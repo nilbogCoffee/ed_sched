@@ -7,57 +7,34 @@
 #We finished the part of the code that reads in the files; need to finish the main function that creates the matches.
 
 
-def make_student_dictionary(file):
-    infile = open(file,"rt")
+def make_student_dictionary(file_name):
+    with open(file_name, 'rt') as reader:
+        Line_list = reader.readlines()
+    Line_list.pop(0)
     Student_Dictionary = {}
-    Line_list = []
-    Skip_Line = True
-    for line in infile:
-        if Skip_Line:
-            Skip_Line = False
-        else:
-            line = line.strip()
-            Line_list.append(line)
 
     for element in Line_list:
+        element = element.strip()
         element = element.split(",")
-        # for piece in element:
-        #     piece = piece.strip("[")
-        #     piece = piece.split(";")
-        #     print(piece)
-
-        # element[1] = element[1].split(";")
-        # element[2] = element[2].split(";")
-        # element[3] = element[3].split(";")
-        # element[6] = element[6].split(";")
         Student_Dictionary[element[0]] = element[1:]
+        Student_Dictionary[element[0]][1] = Student_Dictionary[element[0]][1].split(';')
+        Student_Dictionary[element[0]][2] = Student_Dictionary[element[0]][2].split(';')
 
-    for element in Student_Dictionary:
-        for thing in Student_Dictionary[element]:
-            thing = thing.split(';')
 
-    infile.close()
     return Student_Dictionary
 
-def make_teacher_dictionary(file):
-    infile = open(file, "rt")
+def make_teacher_dictionary(file_name):
+    with open(file_name, 'rt') as reader:
+        Line_list = reader.readlines()
+    Line_list.pop(0)
     Teacher_Dictionary = {}
-    Line_list = []
-    Skip_Line = True
-    for line in infile:
-        if Skip_Line:
-            Skip_Line = False
-        else:
-            line = line.strip()
-            Line_list.append(line)
+    
     for element in Line_list:
+        element = element.strip()
         element = element.split(",")
-    #     element[3] = element[3].split(";")
-    #     element[4] = element[4].split(";")
-    #     element[5] = element[5].split(";")
         Teacher_Dictionary[element[0]] = element[1:]
 
-    infile.close()
+
     return Teacher_Dictionary
 
 
@@ -77,7 +54,6 @@ def compare_lists(student_list, teacher_list):
                 Match_found = True
                 return Match_found,i
     return (Match_found, "None")
-
 
 
 #Need to finish this Main function to actually make the placements
