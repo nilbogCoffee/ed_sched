@@ -6,7 +6,7 @@ def make_students(file_name):
     Create all student objects from the Tidy_Ed_Data_Teachers.csv file
     """
     student_list = []
-    students = csv.DictReader(open(file_name, encoding='utf-8-sig'))
+    students = csv.DictReader(open(file_name, encoding='utf-8-sig'))   # Need encoding field to delete the Byte Order Mark (BOM)
     for student in students:
         student = Student(name=student['Student_Name'],
                           subject=student['Subject'],
@@ -24,7 +24,7 @@ def make_teachers(file_name):
     Create all teacher objects from the Tidy_Ed_Data_Students.csv file
     """
     teacher_list = []
-    teachers = csv.DictReader(open(file_name, encoding='utf-8-sig'))
+    teachers = csv.DictReader(open(file_name, encoding='utf-8-sig'))   # Need encoding field to delete the Byte Order Mark (BOM)
     for teacher in teachers:
         teacher = Teacher(name=teacher['Teacher_Name'],
                           subject=teacher['Subject'],
