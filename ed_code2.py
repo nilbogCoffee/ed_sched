@@ -1,39 +1,37 @@
+import csv
 from classes import Student, Teacher
 
-
 def make_students(file_name):
+    """
+    Create all student objects from the Tidy_Ed_Data_Teachers.csv file
+    """
     student_list = []
-    with open(file_name, 'rt') as reader:
-        lines = reader.readlines()
-    lines.pop(0)
-    for student in lines:
-        student = student.strip()
-        student = student.split(',')
-        student = Student(name=student[0],
-                          subject=student[1],
-                          grades=student[2].split(';'),
-                          availability=student[3].split(';'),
-                          can_drive=student[4],
-                          experience=student[5].split(';'))
+    students = csv.DictReader(open(file_name, encoding='utf-8-sig'))
+    for student in students:
+        student = Student(name=student['Student_Name'],
+                          subject=student['Subject'],
+                          grades=student['Grades'].split(';'),
+                          availability=student['Availability'].split(';'),
+                          can_drive=student['Can_Drive'] == 'T',
+                          experience=student['Previous'].split(';'))
         student_list.append(student)
     
     return student_list
 
 
 def make_teachers(file_name):
+    """
+    Create all teacher objects from the Tidy_Ed_Data_Students.csv file
+    """
     teacher_list = []
-    with open(file_name, 'rt') as reader:
-        lines = reader.readlines()
-    lines.pop(0)
-    for teacher in lines:
-        teacher = teacher.strip()
-        teacher = teacher.split(',')
-        teacher = Teacher(name=teacher[0],
-                          subject=teacher[1],
-                          grade=teacher[2],
-                          school=teacher[3],
-                          availability=teacher[4],
-                          can_walk=teacher[5])
+    teachers = csv.DictReader(open(file_name, encoding='utf-8-sig'))
+    for teacher in teachers:
+        teacher = Teacher(name=teacher['Teacher_Name'],
+                          subject=teacher['Subject'],
+                          grade=teacher['Grade'],
+                          school=teacher['School_Code'],
+                          availability=teacher['Availability'],
+                          can_walk=teacher['Can_Walk'] == 'T')
         teacher_list.append(teacher)
     
     return teacher_list

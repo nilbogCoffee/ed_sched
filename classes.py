@@ -1,6 +1,9 @@
 class Student:
+    """
+    Student parent class
+    """
 
-    def __init__(self, name, subject, grades, availability, can_drive, experience):
+    def __init__(self, name: str, subject: str, grades: list, availability: list, can_drive: bool, experience: list):
         self.name = name
         self.subject = subject
         self.grades = grades
@@ -45,12 +48,20 @@ class Student:
         self.experience = experience
 
     def __str__(self):
-        return self.get_name() + self.get_subject() + str(self.get_grades()) + str(self.get_availability()) + self.get_can_drive() + str(self.get_experience())
+        return str({'name': self.get_name(),
+                'subject': self.get_subject(),
+                'grades': self.get_grades(),
+                'availability': self.get_availability(),
+                'can_drive': self.get_can_drive(),
+                'experience': self.get_experience()})
 
 
 class Teacher:
+    """
+    Teacher parent class
+    """
 
-    def __init__(self, name, subject, grade, school, availability, can_walk):
+    def __init__(self, name: str, subject: str, grade: str, school: str, availability: str, can_walk: bool):
         self.name = name
         self.subject = subject
         self.grade = grade
@@ -95,5 +106,9 @@ class Teacher:
         self.can_walk = can_walk
     
     def __str__(self):
-        return self.get_name() + self.get_subject() + self.get_grade() + self.get_availability() + self.get_school() + self.get_can_walk()
-
+        return str({'name': self.get_name(),
+                'subject': self.get_subject(),
+                'grade': self.get_grade(),
+                'availability': self.get_availability(),
+                'school': self.get_school(),
+                'can_walk': self.get_can_walk()})
