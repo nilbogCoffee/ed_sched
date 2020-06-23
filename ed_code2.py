@@ -84,10 +84,13 @@ def matchmaker(students, teachers):
                     if availability:
                         school = check_school(student, teacher)
                         if not school:
-                            transport = check_transport(student, teacher)
-                            print_sched(student, teacher, transport)
-                            teacher.set_availability("N/A")
-                            break
+                            teacher_is_taken = teacher.get_match_found()
+                            if not teacher_is_taken:
+                                transport = check_transport(student, teacher)
+                                print_sched(student, teacher, transport)
+                                teacher.set_match_found(True)
+                                teacher.set_student(student)
+                                break
 
 
 def main():
@@ -103,3 +106,18 @@ def main():
 
 if __name__ == '__main__':
     main()
+
+
+
+
+# def write_file(teachers)
+# """Example on how to write a dict to a file using dictwriter"""
+# f = open("sched.csv", "w")
+# writer = csv.DictWriter(
+#         f, fieldnames=["Student", "Teacher", "School", "Lab"])
+#     writer.writeheader()
+
+# for teacher in teachers:
+#     writer.writerow({"fruit": "apple", "count": "1"})
+   
+# f.close()

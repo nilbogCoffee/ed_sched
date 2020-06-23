@@ -46,6 +46,13 @@ class Student:
 
     def set_experience(self, experience):
         self.experience = experience
+    
+
+    def set_match_found(self, match_found):
+        self.match = match_found
+    
+
+
 
     def __str__(self):
         return str({'name': self.get_name(),
@@ -61,13 +68,15 @@ class Teacher:
     Teacher parent class
     """
 
-    def __init__(self, name: str, subject: str, grade: str, school: str, availability: str, can_walk: bool):
+    def __init__(self, name: str, subject: str, grade: str, school: str, availability: str, can_walk: bool, match_found=False, student=None):
         self.name = name
         self.subject = subject
         self.grade = grade
         self.school = school
         self.availability = availability
         self.can_walk = can_walk
+        self.match_found = match_found
+        self.student = student
 
     def get_name(self):
         return self.name
@@ -104,6 +113,18 @@ class Teacher:
 
     def set_can_walk(self, can_walk):
         self.can_walk = can_walk
+
+    def get_match_found(self):
+        return self.match_found
+
+    def set_match_found(self, match_found):
+        self.match_found = match_found
+    
+    def get_student(self):
+        return self.student
+    
+    def set_student(self, student):
+        self.student = student
     
     def __str__(self):
         return str({'name': self.get_name(),
