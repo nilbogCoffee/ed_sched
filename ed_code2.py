@@ -7,13 +7,14 @@ def make_students(file_name):
     """
     student_list = []
     students = csv.DictReader(open(file_name, encoding='utf-8-sig'))   # Need encoding field to delete the Byte Order Mark (BOM)
+    fieldnames = students.fieldnames   # Gets the fieldnames from the csv file so we do not have to hardcode values
     for student in students:
-        student = Student(name=student['Student_Name'],
-                          subject=student['Subject'],
-                          grades=student['Grades'].split(';'),
-                          availability=student['Availability'].split(';'),
-                          can_drive=student['Can_Drive'] == 'T',
-                          experience=student['Previous'].split(';'))
+        student = Student(name=student[fieldnames[0]],
+                          subject=student[fieldnames[1]],
+                          grades=student[fieldnames[2]].split(';'),
+                          availability=student[fieldnames[3]].split(';'),
+                          can_drive=student[fieldnames[4]] == 'T',
+                          experience=student[fieldnames[5]].split(';'))
         student_list.append(student)
     
     return student_list
@@ -25,13 +26,15 @@ def make_teachers(file_name):
     """
     teacher_list = []
     teachers = csv.DictReader(open(file_name, encoding='utf-8-sig'))   # Need encoding field to delete the Byte Order Mark (BOM)
+    fieldnames = teachers.fieldnames    # Gets the fieldnames from the csv file so we do not have to hardcode values
+    print('teachers', fieldnames)
     for teacher in teachers:
-        teacher = Teacher(name=teacher['Teacher_Name'],
-                          subject=teacher['Subject'],
-                          grade=teacher['Grade'],
-                          school=teacher['School_Code'],
-                          availability=teacher['Availability'],
-                          can_walk=teacher['Can_Walk'] == 'T')
+        teacher = Teacher(name=teacher[fieldnames[0]],
+                          subject=teacher[fieldnames[1]],
+                          grade=teacher[fieldnames[2]],
+                          school=teacher[fieldnames[3]],
+                          availability=teacher[fieldnames[4]],
+                          can_walk=teacher[fieldnames[5]] == 'T')
         teacher_list.append(teacher)
     
     return teacher_list
@@ -62,9 +65,9 @@ def check_transport(student, teacher):
     return student.get_can_drive() or teacher.get_can_walk()
 
 
-def print_sched(student, teacher, transport):
+def print_sched(student, teacher):
     """Print the schedule results"""
-    if not transport:
+    if not check_transport(student, teacher):
         print(student.get_name() + " will join " + teacher.get_name() + ". Needs to find a ride.")
     else:
          print(student.get_name() + " will join " + teacher.get_name())
@@ -93,6 +96,7 @@ def matchmaker(students, teachers):
                                 break
 
 
+
 def main():
     students = make_students("Tidy_Ed_Data_Students.csv")
     teachers = make_teachers("Tidy_Ed_Data_Teachers.csv")
@@ -106,8 +110,6 @@ def main():
 
 if __name__ == '__main__':
     main()
-
-
 
 
 # def write_file(teachers)
