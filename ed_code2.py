@@ -11,10 +11,10 @@ def make_students(file_name):
     for student in students:
         student = Student(name=student[fieldnames[0]],
                           subject=student[fieldnames[1]],
-                          grades=student[fieldnames[2]].split(';'),
-                          availability=student[fieldnames[3]].split(';'),
+                          grades=student[fieldnames[2]].split(','),
+                          availability=student[fieldnames[3]].split(','),
                           can_drive=student[fieldnames[4]] == 'T',
-                          experience=student[fieldnames[5]].split(';'))
+                          experience=student[fieldnames[5]].split(','))
         student_list.append(student)
     
     return student_list
@@ -27,7 +27,6 @@ def make_teachers(file_name):
     teacher_list = []
     teachers = csv.DictReader(open(file_name, encoding='utf-8-sig'))   # Need encoding field to delete the Byte Order Mark (BOM)
     fieldnames = teachers.fieldnames    # Gets the fieldnames from the csv file so we do not have to hardcode values
-    print('teachers', fieldnames)
     for teacher in teachers:
         teacher = Teacher(name=teacher[fieldnames[0]],
                           subject=teacher[fieldnames[1]],
@@ -92,7 +91,7 @@ def matchmaker(students, teachers):
                 teacher.set_student(student)
 
 
-def write_file(teachers):
+def write_schedule(teachers):
     """Write results to csv file"""
     with open("sched.csv", "w") as schedule:
         writer = csv.DictWriter(schedule, fieldnames=["Student", "Teacher", "School", "Lab"])
@@ -103,7 +102,8 @@ def write_file(teachers):
                 writer.writerow({"Student": teacher.get_student().get_name(), "Teacher": teacher.get_name(), "School": teacher.get_school(),"Lab": teacher.get_availability()})
 
 
-def write_students(students):
+def write_extra_students(students):
+    """Write the students that have no assigned field experience to a csv file"""
     with open("unmatched_students.csv", "w") as schedule:
         writer = csv.DictWriter(schedule, fieldnames=["Student","Lab", "Can Drive"])
         writer.writeheader()
@@ -122,10 +122,13 @@ def main():
     print()
     for teacher in teachers:
         print(teacher)
+
+    print()
     matchmaker(students, teachers)
 
-    write_file(teachers)
-    write_students(students)
+    write_schedule(teachers)
+    write_extra_students(students)
+
 
 if __name__ == '__main__':
     main()
