@@ -3,13 +3,14 @@ class Student:
     Student parent class
     """
 
-    def __init__(self, name: str, subject: str, grades: list, availability: list, can_drive: bool, experience: list):
+    def __init__(self, name: str, subject: str, grades: list, availability: list, can_drive: bool, experience: list, match_found=False):
         self.name = name
         self.subject = subject
         self.grades = grades
         self.availability = availability
         self.can_drive = can_drive
         self.experience = experience
+        self.match_found = match_found
 
     def get_name(self):
         return self.name
@@ -46,13 +47,12 @@ class Student:
 
     def set_experience(self, experience):
         self.experience = experience
-    
 
+    def get_match_found(self):
+        return self.match_found
+    
     def set_match_found(self, match_found):
-        self.match = match_found
-    
-
-
+        self.match_found = match_found
 
     def __str__(self):
         return str({'name': self.get_name(),

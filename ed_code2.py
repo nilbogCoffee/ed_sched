@@ -70,7 +70,7 @@ def print_sched(student, teacher):
     if not check_transport(student, teacher):
         print(student.get_name() + " will join " + teacher.get_name() + ". Needs to find a ride.")
     else:
-         print(student.get_name() + " will join " + teacher.get_name())
+        print(student.get_name() + " will join " + teacher.get_name())
 
 
 def matchmaker(students, teachers):
@@ -80,21 +80,37 @@ def matchmaker(students, teachers):
     for student in students:
         for teacher in teachers:
             subject = check_subject(student, teacher)
-            if subject:
-                grade = check_grade(student, teacher)
-                if grade:
-                    availability = check_availability(student, teacher)
-                    if availability:
-                        school = check_school(student, teacher)
-                        if not school:
-                            teacher_is_taken = teacher.get_match_found()
-                            if not teacher_is_taken:
-                                transport = check_transport(student, teacher)
-                                print_sched(student, teacher, transport)
-                                teacher.set_match_found(True)
-                                teacher.set_student(student)
-                                break
+            grade = check_grade(student, teacher)
+            availability = check_availability(student, teacher)
+            school = check_school(student, teacher)
+            teacher_is_taken = teacher.get_match_found()
+            
+            if subject and grade and availability and not school and not teacher_is_taken:
+                print_sched(student, teacher)
+                teacher.set_match_found(True)
+                student.set_match_found(True)
+                teacher.set_student(student)
 
+
+def write_file(teachers):
+    """Write results to csv file"""
+    with open("sched.csv", "w") as schedule:
+        writer = csv.DictWriter(schedule, fieldnames=["Student", "Teacher", "School", "Lab"])
+        writer.writeheader()
+
+        for teacher in teachers:
+            if teacher.get_student() is not None:
+                writer.writerow({"Student": teacher.get_student().get_name(), "Teacher": teacher.get_name(), "School": teacher.get_school(),"Lab": teacher.get_availability()})
+
+
+def write_students(students):
+    with open("unmatched_students.csv", "w") as schedule:
+        writer = csv.DictWriter(schedule, fieldnames=["Student","Lab", "Can Drive"])
+        writer.writeheader()
+
+        for student in students:
+            if not student.get_match_found():
+                writer.writerow({"Student": student.get_name(), "Lab": student.get_availability(), "Can Drive": student.get_can_drive()})
 
 
 def main():
@@ -108,18 +124,9 @@ def main():
         print(teacher)
     matchmaker(students, teachers)
 
+    write_file(teachers)
+    write_students(students)
+
 if __name__ == '__main__':
     main()
 
-
-# def write_file(teachers)
-# """Example on how to write a dict to a file using dictwriter"""
-# f = open("sched.csv", "w")
-# writer = csv.DictWriter(
-#         f, fieldnames=["Student", "Teacher", "School", "Lab"])
-#     writer.writeheader()
-
-# for teacher in teachers:
-#     writer.writerow({"fruit": "apple", "count": "1"})
-   
-# f.close()
