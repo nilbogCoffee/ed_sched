@@ -13,8 +13,9 @@ def make_students(file_name):
                           subject=student[fieldnames[1]],
                           grades=student[fieldnames[2]].split(','),
                           availability=student[fieldnames[3]].split(','),
-                          can_drive=student[fieldnames[4]] == 'T',
-                          experience=student[fieldnames[5]].split(','))
+                          can_drive=student[fieldnames[4]] == 'Yes',
+                          can_car_pool=student[fieldnames[5]] == 'Yes',
+                          experience=student[fieldnames[6]].split(','))
         student_list.append(student)
     
     return student_list
@@ -33,7 +34,7 @@ def make_teachers(file_name):
                           grade=teacher[fieldnames[2]],
                           school=teacher[fieldnames[3]],
                           availability=teacher[fieldnames[4]],
-                          can_walk=teacher[fieldnames[5]] == 'T')
+                          can_walk=teacher[fieldnames[5]] == 'Yes')
         teacher_list.append(teacher)
     
     return teacher_list
@@ -64,18 +65,22 @@ def check_transport(student, teacher):
     return student.get_can_drive() or teacher.get_can_walk()
 
 
-def print_sched(student, teacher):
+def print_sched(teachers):
     """Print the schedule results"""
-    if not check_transport(student, teacher):
-        print(student.get_name() + " will join " + teacher.get_name() + ". Needs to find a ride.")
-    else:
-        print(student.get_name() + " will join " + teacher.get_name())
+    for teacher in teachers:
+        student = teacher.get_student()
+        if student:
+            if len(student.get_other_drivers()) != 0:
+                print(student.get_name() + " will join " + teacher.get_name() + f". {student.get_name()} should get a ride from:", ', '.join([driver.get_name() for driver in student.get_other_drivers()]))
+            else:
+                print(student.get_name() + " will join " + teacher.get_name())
 
 
 def matchmaker(students, teachers):
     """
     Determines which students are matches with each teacher by each student object attribute
     """
+    needs_a_ride = []
     for student in students:
         for teacher in teachers:
             subject = check_subject(student, teacher)
@@ -83,12 +88,25 @@ def matchmaker(students, teachers):
             availability = check_availability(student, teacher)
             school = check_school(student, teacher)
             teacher_is_taken = teacher.get_match_found()
+            can_get_there = check_transport(student, teacher)
             
             if subject and grade and availability and not school and not teacher_is_taken:
-                print_sched(student, teacher)
                 teacher.set_match_found(True)
                 student.set_match_found(True)
                 teacher.set_student(student)
+                student.set_availability(teacher.get_availability())
+                if not can_get_there:
+                    needs_a_ride.append(student)
+    
+    assign_drivers(needs_a_ride, students)
+    print_sched(teachers)
+
+
+def assign_drivers(students_need_ride, other_students):
+    for student in students_need_ride:
+       for driver in other_students:
+           if driver.get_availability() == student.get_availability() and driver.get_can_car_pool():
+               student.add_driver(driver)
 
 
 def write_schedule(teachers):
@@ -119,11 +137,11 @@ def main():
     for student in students:
         print(student)
 
-    print()
-    for teacher in teachers:
-        print(teacher)
+    # print()
+    # for teacher in teachers:
+    #     print(teacher)
 
-    print()
+    # print()
     matchmaker(students, teachers)
 
     write_schedule(teachers)

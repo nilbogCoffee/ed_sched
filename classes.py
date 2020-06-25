@@ -3,14 +3,16 @@ class Student:
     Student parent class
     """
 
-    def __init__(self, name: str, subject: str, grades: list, availability: list, can_drive: bool, experience: list, match_found=False):
+    def __init__(self, name: str, subject: str, grades: list, availability: list, can_drive: bool, can_car_pool: bool, experience: list, match_found=False):
         self.name = name
         self.subject = subject
         self.grades = grades
         self.availability = availability
         self.can_drive = can_drive
+        self.can_car_pool = can_car_pool
         self.experience = experience
         self.match_found = match_found
+        self.other_drivers = []
 
     def get_name(self):
         return self.name
@@ -42,6 +44,12 @@ class Student:
     def set_can_drive(self, can_drive):
         self.can_drive = can_drive
 
+    def get_can_car_pool(self):
+        return self.can_car_pool
+
+    def set_can_car_pool(self, can_car_pool):
+        self.can_car_pool = can_car_pool
+
     def get_experience(self):
         return self.experience
 
@@ -53,6 +61,12 @@ class Student:
     
     def set_match_found(self, match_found):
         self.match_found = match_found
+        
+    def get_other_drivers(self):
+        return self.other_drivers
+    
+    def add_driver(self, other_driver):
+        self.other_drivers.append(other_driver)
 
     def __str__(self):
         return str({'name': self.get_name(),
@@ -60,6 +74,7 @@ class Student:
                 'grades': self.get_grades(),
                 'availability': self.get_availability(),
                 'can_drive': self.get_can_drive(),
+                'can_car_pool': self.get_can_car_pool(),
                 'experience': self.get_experience()})
 
 

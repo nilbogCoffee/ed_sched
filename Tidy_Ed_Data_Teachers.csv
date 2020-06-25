@@ -1,9 +1,9 @@
 ﻿Teacher_Name,Subject,Grade,School_Code,Availability,Can_Walk
-Lindsay Jordan,Elementary,K,APES,L2,F
-Megan Murphy,Elementary,3,APES,L3,F
-Christine Braxmeier,Math,8,EAMS,L5,F
-Jennifer McCauley,Math,12,FHS,L4,F
-Laura Bickley,Elementary,2,WPES,L5,T
-Jessie O’Brien-Sheats,English,9,FHS,L4,F
-Karen L Hoffman,Science,12,LHS,L5,T
-Sheri Majczan,Science,6,NEMS,L2,F
+Lindsay Jordan,Elementary,K,APES,L2,No
+Megan Murphy,Elementary,3,APES,L3,No
+Christine Braxmeier,Math,8,EAMS,L5,No
+Jennifer McCauley,Math,12,FHS,L4,No
+Laura Bickley,Elementary,2,WPES,L5,Yes
+Jessie O’Brien-Sheats,English,9,FHS,L4,No
+Karen L Hoffman,Science,12,LHS,L5,Yes
+Sheri Majczan,Science,6,NEMS,L2,No
