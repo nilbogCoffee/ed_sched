@@ -64,6 +64,9 @@ class Student:
         
     def get_other_drivers(self):
         return self.other_drivers
+
+    def set_other_drivers(self, other_drivers):
+        self.other_drivers = other_drivers
     
     def add_driver(self, other_driver):
         self.other_drivers.append(other_driver)

@@ -69,16 +69,19 @@ def print_sched(teachers):
     """Print the schedule results"""
     for teacher in teachers:
         student = teacher.get_student()
-        if student:
-            if len(student.get_other_drivers()) != 0:
-                print(student.get_name() + " will join " + teacher.get_name() + f". {student.get_name()} should get a ride from:", ', '.join([driver.get_name() for driver in student.get_other_drivers()]))
-            else:
-                print(student.get_name() + " will join " + teacher.get_name())
+        if student and student.get_other_drivers():
+            print(f"{student.get_name()} will join {teacher.get_name()}. {student.get_name()} should get a ride from:", 
+                   ', '.join([driver.get_name() for driver in student.get_other_drivers()]))
+        elif student:
+            print(f"{student.get_name()} will join {teacher.get_name()}")
+        # else:
+        #     print(f"{teacher.get_name()} has no student.")
 
 
 def matchmaker(students, teachers):
     """
     Determines which students are matches with each teacher by each student object attribute
+    This is the main function that this program is centered around
     """
     needs_a_ride = []
     for student in students:
@@ -94,7 +97,7 @@ def matchmaker(students, teachers):
                 teacher.set_match_found(True)
                 student.set_match_found(True)
                 teacher.set_student(student)
-                student.set_availability(teacher.get_availability())
+                student.set_availability(teacher.get_availability())  # Overwrite the student's availability to the teacher's availability
                 if not can_get_there:
                     needs_a_ride.append(student)
     
@@ -102,9 +105,10 @@ def matchmaker(students, teachers):
     print_sched(teachers)
 
 
-def assign_drivers(students_need_ride, other_students):
+def assign_drivers(students_need_ride, all_students):
+    """Students that need a ride are given a list of students that are available for car pool"""
     for student in students_need_ride:
-       for driver in other_students:
+       for driver in all_students:
            if driver.get_availability() == student.get_availability() and driver.get_can_car_pool():
                student.add_driver(driver)
 
@@ -117,7 +121,10 @@ def write_schedule(teachers):
 
         for teacher in teachers:
             if teacher.get_student() is not None:
-                writer.writerow({"Student": teacher.get_student().get_name(), "Teacher": teacher.get_name(), "School": teacher.get_school(),"Lab": teacher.get_availability()})
+                writer.writerow({"Student": teacher.get_student().get_name(), 
+                                 "Teacher": teacher.get_name(), 
+                                 "School": teacher.get_school(),
+                                 "Lab": teacher.get_availability()})
 
 
 def write_extra_students(students):
@@ -128,7 +135,9 @@ def write_extra_students(students):
 
         for student in students:
             if not student.get_match_found():
-                writer.writerow({"Student": student.get_name(), "Lab": student.get_availability(), "Can Drive": student.get_can_drive()})
+                writer.writerow({"Student": student.get_name(), 
+                                 "Lab": ','.join(student.get_availability()), 
+                                 "Can Drive": 'Yes' if student.get_can_drive() else 'No'})
 
 
 def main():
