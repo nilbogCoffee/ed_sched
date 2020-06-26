@@ -79,15 +79,18 @@ def print_sched(teachers):
 
 
 def perform_checks(student, teacher):
-    """Perform all checks between student and teacher to see if they are compatible"""
+    """
+    Perform all checks between student and teacher to see if they are compatible
+    Returns a tuple of whether the match is found and whether the student can commute
+    """
     subject = check_subject(student, teacher)
     grade = check_grade(student, teacher)
     availability = check_availability(student, teacher)
     school = check_school(student, teacher)
     teacher_is_taken = teacher.get_match_found()
-    can_get_there = check_transport(student, teacher)
+    student_can_commute = check_transport(student, teacher)
 
-    return subject, grade, availability, school, teacher_is_taken, can_get_there
+    return subject and grade and availability and not school and not teacher_is_taken, student_can_commute
 
 
 def match_found(student, teacher):
@@ -103,18 +106,18 @@ def matchmaker(students, teachers):
     Determines which students are matches with each teacher by each student object attribute
     This is the main function that this program is centered around
     """
-    needs_a_ride = []
+    students_need_ride = []
     for student in students:
         for teacher in teachers:
-            subject, grade, availability, school, teacher_is_taken, can_get_there = perform_checks(student, teacher)
+            student_matches_teacher, student_can_commute = perform_checks(student, teacher)
             
-            if subject and grade and availability and not school and not teacher_is_taken:
+            if student_matches_teacher:
                 match_found(student, teacher)
 
-                if not can_get_there:
-                    needs_a_ride.append(student)
+                if not student_can_commute:
+                    students_need_ride.append(student)
     
-    assign_drivers(needs_a_ride, students)
+    assign_drivers(students_need_ride, students)
     print_sched(teachers)
 
 
@@ -133,7 +136,7 @@ def write_schedule(teachers):
         writer.writeheader()
 
         for teacher in teachers:
-            if teacher.get_student() is not None:
+            if teacher.get_match_found():
                 writer.writerow({"Student": teacher.get_student().get_name(), 
                                  "Teacher": teacher.get_name(), 
                                  "School": teacher.get_school(),
