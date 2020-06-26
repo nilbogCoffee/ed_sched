@@ -156,25 +156,25 @@ def write_extra_students(students):
                                  "Can Drive": 'Yes' if student.get_can_drive() else 'No'})
 
 
-def main():
-    students = make_students("Tidy_Ed_Data_Students.csv")
-    teachers = make_teachers("Tidy_Ed_Data_Teachers.csv")
-    for student in students:
-        print(student)
+# def main():
+#     students = make_students("Tidy_Ed_Data_Students.csv")
+#     teachers = make_teachers("Tidy_Ed_Data_Teachers.csv")
+#     for student in students:
+#         print(student)
 
-    # print()
-    # for teacher in teachers:
-    #     print(teacher)
+#     # print()
+#     # for teacher in teachers:
+#     #     print(teacher)
 
-    # print()
-    matchmaker(students, teachers)
+#     # print()
+#     matchmaker(students, teachers)
 
-    write_schedule(teachers)
-    write_extra_students(students)
+#     write_schedule(teachers)
+#     write_extra_students(students)
 
 
-if __name__ == '__main__':
-    main()
+# if __name__ == '__main__':
+#     main()
 
 
 """
@@ -183,5 +183,5 @@ TODO:
 2. Make another file called Main that runs the program and remove the main function from this file
 3. Write bash script to find the csv files on the computer in case files are in different directories 
    and actually run the program so that a user can execute program on double click of the bash script
-4. Add GUI so that user can specify the name of the csv files or maybe even drag/drop if Python permits
+4. Add GUI so that user can choose files from their Finder Menu (This is partially done. Not visually appealing)
 """
