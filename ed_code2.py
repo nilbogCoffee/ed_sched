@@ -176,3 +176,12 @@ def main():
 if __name__ == '__main__':
     main()
 
+
+"""
+TODO:
+1. Ask Mrs. Correll to fix the original file with correct headers and proper formatting
+2. Make another file called Main that runs the program and remove the main function from this file
+3. Write bash script to find the csv files on the computer in case files are in different directories 
+   and actually run the program so that a user can execute program on double click of the bash script
+4. Add GUI so that user can specify the name of the csv files or maybe even drag/drop if Python permits
+"""
