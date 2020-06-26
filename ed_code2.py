@@ -78,6 +78,26 @@ def print_sched(teachers):
         #     print(f"{teacher.get_name()} has no student.")
 
 
+def perform_checks(student, teacher):
+    """Perform all checks between student and teacher to see if they are compatible"""
+    subject = check_subject(student, teacher)
+    grade = check_grade(student, teacher)
+    availability = check_availability(student, teacher)
+    school = check_school(student, teacher)
+    teacher_is_taken = teacher.get_match_found()
+    can_get_there = check_transport(student, teacher)
+
+    return subject, grade, availability, school, teacher_is_taken, can_get_there
+
+
+def match_found(student, teacher):
+    """Match found between student and teacher. Sets the teacher's student. Overwrites the student's availability"""
+    teacher.set_match_found(True)
+    student.set_match_found(True)
+    teacher.set_student(student)
+    student.set_availability(teacher.get_availability())  # Overwrite the student's availability to the teacher's availability
+
+
 def matchmaker(students, teachers):
     """
     Determines which students are matches with each teacher by each student object attribute
@@ -86,18 +106,11 @@ def matchmaker(students, teachers):
     needs_a_ride = []
     for student in students:
         for teacher in teachers:
-            subject = check_subject(student, teacher)
-            grade = check_grade(student, teacher)
-            availability = check_availability(student, teacher)
-            school = check_school(student, teacher)
-            teacher_is_taken = teacher.get_match_found()
-            can_get_there = check_transport(student, teacher)
+            subject, grade, availability, school, teacher_is_taken, can_get_there = perform_checks(student, teacher)
             
             if subject and grade and availability and not school and not teacher_is_taken:
-                teacher.set_match_found(True)
-                student.set_match_found(True)
-                teacher.set_student(student)
-                student.set_availability(teacher.get_availability())  # Overwrite the student's availability to the teacher's availability
+                match_found(student, teacher)
+
                 if not can_get_there:
                     needs_a_ride.append(student)
     
