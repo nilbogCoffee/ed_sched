@@ -1,3 +1,4 @@
+import os
 import tkinter as tk
 import tkinter.ttk as ttk
 from tkinter import filedialog
@@ -50,7 +51,9 @@ class run_GUI:
 
     def choose_student_file(self):
         """Retrieve the full path for the student .csv file from the Finder Menu"""
-        filename = filedialog.askopenfilename(initialdir="/", title="Select A File", filetypes=(("csv files","*.csv"),("all files","*.*")) )
+        filename = filedialog.askopenfilename(initialdir=os.getenv('HOME', '/'), 
+                                              title="Select A Student .csv File", 
+                                              filetypes=(("csv files","*.csv"),))
         if not filename:
             return # Error message
         self.display_student_file(filename)
@@ -58,7 +61,9 @@ class run_GUI:
 
     def choose_teacher_file(self):
         """Retrieve the full path for the teacher .csv file from the Finder Menu"""
-        filename = filedialog.askopenfilename(initialdir="/", title="Select A File", filetypes=(("csv files","*.csv"),("all files","*.*")) )
+        filename = filedialog.askopenfilename(initialdir=os.getenv('HOME', '/'), 
+                                              title="Select A Teacher .csv File", 
+                                              filetypes=(("csv files","*.csv"),))
         if not filename:
             return # Error message
         self.display_teacher_file(filename)
@@ -93,15 +98,17 @@ class run_GUI:
 
     def expose_run_button(self):
         """Creates the run button and links it to the run function which begins the scheduling from within the ed_code2.py file"""
-        print(self.get_filenames())
-        if self.filenames['Student'] and self.filenames['Teacher']:
-            run_button = ttk.Button(master=self.window, text="Create Schedule", command=lambda: run(self.get_filenames())).pack()
+        ttk.Button(master=self.window, text="Create Schedule", command=lambda: run(self.get_filenames())).pack()
 
 
 def run(filenames):
     
-    students = make_students(filenames['Student'])
-    teachers = make_teachers(filenames['Teacher'])
+    # Try and except these files
+    try:
+        students = make_students(filenames['Student'])
+        teachers = make_teachers(filenames['Teacher'])
+    except:
+        pass
     
     matchmaker(students, teachers)
 

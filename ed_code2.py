@@ -9,7 +9,6 @@ def make_students(file_name):
     student_list = []
     students = csv.DictReader(open(file_name, encoding='utf-8-sig'))   # Need encoding field to delete the Byte Order Mark (BOM)
     fieldnames = students.fieldnames   # Gets the fieldnames from the csv file so we do not have to hardcode values
-     # try and except here
     for student in students:
         student = Student(name=student[fieldnames[0]],
                           subject=student[fieldnames[1]],
@@ -30,7 +29,6 @@ def make_teachers(file_name):
     teacher_list = []
     teachers = csv.DictReader(open(file_name, encoding='utf-8-sig'))   # Need encoding field to delete the Byte Order Mark (BOM)
     fieldnames = teachers.fieldnames    # Gets the fieldnames from the csv file so we do not have to hardcode values
-    # try and except here
     for teacher in teachers:
         teacher = Teacher(name=teacher[fieldnames[0]],
                           subject=teacher[fieldnames[1]],
