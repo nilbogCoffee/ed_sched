@@ -1,4 +1,5 @@
 import csv
+# import run_program_GUI
 from classes import Student, Teacher
 
 def make_students(file_name):
@@ -8,6 +9,7 @@ def make_students(file_name):
     student_list = []
     students = csv.DictReader(open(file_name, encoding='utf-8-sig'))   # Need encoding field to delete the Byte Order Mark (BOM)
     fieldnames = students.fieldnames   # Gets the fieldnames from the csv file so we do not have to hardcode values
+     # try and except here
     for student in students:
         student = Student(name=student[fieldnames[0]],
                           subject=student[fieldnames[1]],
@@ -28,6 +30,7 @@ def make_teachers(file_name):
     teacher_list = []
     teachers = csv.DictReader(open(file_name, encoding='utf-8-sig'))   # Need encoding field to delete the Byte Order Mark (BOM)
     fieldnames = teachers.fieldnames    # Gets the fieldnames from the csv file so we do not have to hardcode values
+    # try and except here
     for teacher in teachers:
         teacher = Teacher(name=teacher[fieldnames[0]],
                           subject=teacher[fieldnames[1]],
@@ -179,9 +182,8 @@ def write_extra_students(students):
 
 """
 TODO:
-1. Ask Mrs. Correll to fix the original file with correct headers and proper formatting
+1. Ask Mrs. Correll to fix the original file with correct headers and proper formatting (Google Form)
 2. Make another file called Main that runs the program and remove the main function from this file
-3. Write bash script to find the csv files on the computer in case files are in different directories 
-   and actually run the program so that a user can execute program on double click of the bash script
+3. Write bash script to actually run the program so that a user can execute program on double click of the bash script
 4. Add GUI so that user can choose files from their Finder Menu (This is partially done. Not visually appealing)
 """

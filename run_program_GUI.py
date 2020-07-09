@@ -16,6 +16,8 @@ class run_GUI:
         self.window = tk.Tk()
         self.window.title("Field Experience Scheduler")
         self.filenames = {}
+        self.confirmation_teacher_label = ''
+        self.confirmation_student_label = ''
 
 
     def check_run_button(self):
@@ -23,24 +25,43 @@ class run_GUI:
             self.expose_run_button()
 
 
-    def display_file(self, filename, type_of_file):
+    def display_student_file(self, filename):
         """Add the file to the filenames dictionary and retrieve the file's name without the full path to display it"""
-        self.add_file(filename, type_of_file)
+        self.add_file(filename, 'Student')
         filename = self.parse_filename(filename)
-        tk.Label(master=self.window, text=f"{type_of_file} file: {filename}").pack()
+        if self.confirmation_student_label:
+            self.confirmation_student_label.destroy()
+
+        self.confirmation_student_label = tk.Label(master=self.window, text=f"Student file: {filename}")
+        self.confirmation_student_label.pack()
+        self.check_run_button()
+
+    
+    def display_teacher_file(self, filename):
+        self.add_file(filename, 'Teacher')
+        filename = self.parse_filename(filename)
+        if self.confirmation_teacher_label:
+            self.confirmation_teacher_label.destroy()
+
+        self.confirmation_teacher_label = tk.Label(master=self.window, text=f"Teacher file: {filename}")
+        self.confirmation_teacher_label.pack()
         self.check_run_button()
 
 
     def choose_student_file(self):
         """Retrieve the full path for the student .csv file from the Finder Menu"""
-        filename = filedialog.askopenfilename()
-        self.display_file(filename, 'Student')
+        filename = filedialog.askopenfilename(initialdir="/", title="Select A File", filetypes=(("csv files","*.csv"),("all files","*.*")) )
+        if not filename:
+            return # Error message
+        self.display_student_file(filename)
 
 
     def choose_teacher_file(self):
         """Retrieve the full path for the teacher .csv file from the Finder Menu"""
-        filename = filedialog.askopenfilename()
-        self.display_file(filename, 'Teacher')
+        filename = filedialog.askopenfilename(initialdir="/", title="Select A File", filetypes=(("csv files","*.csv"),("all files","*.*")) )
+        if not filename:
+            return # Error message
+        self.display_teacher_file(filename)
 
 
     def parse_filename(self, filename):
@@ -72,7 +93,9 @@ class run_GUI:
 
     def expose_run_button(self):
         """Creates the run button and links it to the run function which begins the scheduling from within the ed_code2.py file"""
-        run_button = ttk.Button(master=self.window, text="Create Schedule", command=lambda: run(self.get_filenames())).pack()
+        print(self.get_filenames())
+        if self.filenames['Student'] and self.filenames['Teacher']:
+            run_button = ttk.Button(master=self.window, text="Create Schedule", command=lambda: run(self.get_filenames())).pack()
 
 
 def run(filenames):
