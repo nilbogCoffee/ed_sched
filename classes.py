@@ -74,13 +74,13 @@ class Student:
         self.email = email
 
     def __str__(self):
-        return str({'email': self.get_email(),
-                    'name': self.get_name(),
-                    'certifiction': self.get_certification(),
-                    'grades': self.get_grades(),
-                    'transportation': self.get_trasportaion(),
-                    'transport others': self.get_transport_others(),
-                    'past schools': self.get_past_schools()})
+        return (f'Email: {self.get_email()}\n'
+                f'Name: {self.get_name()}\n'
+                f'Certification: {self.get_certification()}\n'
+                f'Grades: {self.get_grades()}\n'
+                f'Transportation: {self.get_trasportaion()}\n'
+                f'Transport Others: {self.get_transport_others()}\n'
+                f'Past Schools: {self.get_past_schools()}')
 
 
 class Stage1And2Student(Student):
@@ -102,6 +102,10 @@ class Stage1And2Student(Student):
     def set_alt_lab_times(self, times):
         self.alt_lab_times = times
 
+    def __str__(self):
+        return super().__str__() + (f'\nPreferred Lab Time: {self.get_preferred_lab_time()}'
+                                    f'\nAlternate Lab Times: {self.get_alt_lab_times()}')
+
 
 class Stage3Student(Student):
     def __init__(self, email: str, name: str, certification: str, grades: list, transportation: bool, transport_others: bool, 
@@ -115,7 +119,10 @@ class Stage3Student(Student):
     def set_lab_times(self, times):
         self.lab_times = times
 
-
+    def __str__(self):
+        return super().__str__() + f'\nLab Times: {self.get_lab_times()}'
+        
+        
 class Teacher:
     """
     Teacher parent class
