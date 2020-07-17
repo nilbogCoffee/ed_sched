@@ -1,6 +1,6 @@
 import csv
 # import run_program_GUI
-from classes import Student, Teacher
+from classes import Teacher, Certification, LabTime, Stage1And2Student, Stage3Student
 
 def make_students(file_name):
     """
@@ -8,16 +8,107 @@ def make_students(file_name):
     """
     student_list = []
     students = csv.DictReader(open(file_name, encoding='utf-8-sig'))   # Need encoding field to delete the Byte Order Mark (BOM)
-    fieldnames = students.fieldnames   # Gets the fieldnames from the csv file so we do not have to hardcode values
     for student in students:
-        student = Student(name=student[fieldnames[0]],
-                          subject=student[fieldnames[1]],
-                          grades=student[fieldnames[2]].split(','),
-                          availability=student[fieldnames[3]].split(','),
-                          can_drive=student[fieldnames[4]] == 'Yes',
-                          can_car_pool=student[fieldnames[5]] == 'Yes',
-                          experience=student[fieldnames[6]].split(','))
-        student_list.append(student)
+        email = student['Email']
+        first_name = student['First Name']
+        last_name = student['Last Name']
+        certification = student['Certification(s)']
+        transportation = student['Transportation']
+        transport_others = student['Transport Others']
+        # past_schools = [student['School 1'], student['School 2'], student['School 3'], student['School 4']].lower()
+
+        certification_list = []
+        certifications = certification.split(',')
+        for cert in certifications:
+            # Can be other and weird PK values as well as special education
+            subject = cert[cert.rfind(' '):]
+            print(subject)
+            grades = cert[cert.find('(') + 1 : cert.find(')')]
+            if grades[0] == 'K':
+                grades[0] = '0'
+            if grades[0] == 'PK':
+                grades[0] = '-1'
+            grades = list(range(int(grades[0]), int(grades[-1]) + 1))
+            print(grades)
+            certification_list.append(Certification(subject=subject, grades=grades))
+
+        stage = student['Stage']
+        lab_times = []
+        if stage == 'Stage 1 & 2':
+            # Can be None
+            preferred_time = student['Preferred Time']
+            alternate_times = student['Alternate Time']
+            alt_times = []
+
+            preferred_time_days = preferred_time[7:10].split('/')
+            print(preferred_time_days)
+            preferred_time_time = preferred_time[11:]
+            print(preferred_time_time)
+
+            for alternate in alternate_times:
+                alternate_days = alternate[7:10].split('/')
+                alternate_time = alternate[11:]
+                
+            preferred_lab_time = LabTime(days=preferred_time_days, time=preferred_time_time)
+
+            new_student = Stage1And2Student(email=email,
+                                            name=first_name + last_name,
+                                            certification=certification_list,
+                                            transportation=transportation == 'Yes',
+                                            transport_others=transport_others == 'Yes',
+                                            preferred_lab_time=preferred_lab_time,
+                                            alt_lab_times = alt_times,
+                                            past_schools=past_schools)
+
+
+        elif stage == 'Stage 3':
+            # Can be None
+            time_260 = student['260 Time']
+            time_360 = student['360-366 Time']
+            time_368 = student['368 Time']
+            time_3582 = student['358.2 Time']
+            lab_times = []
+
+            if time_260:
+                times = time_260.split(',')
+                for time in times:
+                    days = time[7:10].split('/')
+                    lab_time = time[11:]
+                    lab_times.append(LabTime(days=days, time=lab_time))
+
+            if time_360:
+                times = time_360.split(',')
+                for time in times:
+                    days = time[7:16].split('/')
+                    lab_time = time[17:]
+                    lab_times.append(LabTime(days=days, time=lab_time))
+
+            if time_368:
+                times = time_368.split(',')
+                for time in times:
+                    days = time_368[7:12].split('/')
+                    lab_time = time_368[13:]
+                    lab_times.append(LabTime(days=days, time=lab_time))
+
+            if time_3582:
+                times = time_3582.split(',')
+                for time in times:
+                    if 'A' in time:
+                        days = time[7:12].split('/')
+                        lab_time = time[13:]
+                    else:
+                        days = time[7:10]
+                        lab_time = time[11:]
+                    lab_times.append(LabTime(days=days, time=lab_time))
+            
+
+        # student = Student(name=student['First Name'] + ' ' + student['Last Name'],
+        #                   certification=certification_list,
+        #                   availability=student[fieldnames[3]].split(','),
+        #                   can_drive=student[fieldnames[4]] == 'Yes',
+        #                   can_car_pool=student[fieldnames[5]] == 'Yes',
+        #                   experience=student[fieldnames[6]].split(','))
+        # student_list.append(student)
     
     return student_list
 
@@ -157,25 +248,25 @@ def write_extra_students(students):
                                  "Can Drive": 'Yes' if student.get_can_drive() else 'No'})
 
 
-# def main():
-#     students = make_students("Tidy_Ed_Data_Students.csv")
-#     teachers = make_teachers("Tidy_Ed_Data_Teachers.csv")
-#     for student in students:
-#         print(student)
+def main():
+    students = make_students("Tidy_Ed_Data_Students.csv")
+    teachers = make_teachers("Tidy_Ed_Data_Teachers.csv")
+    for student in students:
+        print(student)
 
-#     # print()
-#     # for teacher in teachers:
-#     #     print(teacher)
+    # print()
+    # for teacher in teachers:
+    #     print(teacher)
 
-#     # print()
-#     matchmaker(students, teachers)
+    # print()
+    matchmaker(students, teachers)
 
-#     write_schedule(teachers)
-#     write_extra_students(students)
+    write_schedule(teachers)
+    write_extra_students(students)
 
 
-# if __name__ == '__main__':
-#     main()
+if __name__ == '__main__':
+    main()
 
 
 """

@@ -3,13 +3,11 @@ class Student:
     Student parent class
     """
 
-    def __init__(self, email: str, name: str, certification: str, grades: list, transportation: bool, transport_others: bool, 
-                 past_schools: list):
+    def __init__(self, email: str, name: str, certifications: list, transportation: bool, transport_others: bool, past_schools: list):
         self.email = email
         self.name = name
-        self.certification = certification
+        self.certifications = certifications
         # Certification can be other. Decide later
-        self.grades = grades
         self.transportation = transportation
         self.transport_others = transport_others
         self.past_schools = past_schools
@@ -22,17 +20,11 @@ class Student:
     def set_name(self, name):
         self.name = name
 
-    def get_certification(self):
-        return self.certification
+    def get_certifications(self):
+        return self.certifications
 
-    def set_certification(self, certification):
-        self.certification = certification
-
-    def get_grades(self):
-        return self.grades
-
-    def set_grades(self, grades):
-        self.grades = grades
+    def set_certifications(self, certifications):
+        self.certifications = certifications
 
     def get_trasportaion(self):
         return self.transportation
@@ -84,9 +76,9 @@ class Student:
 
 
 class Stage1And2Student(Student):
-    def __init__(self, email: str, name: str, certification: str, grades: list, transportation: bool, transport_others: bool, 
+    def __init__(self, email: str, name: str, certifications: list, transportation: bool, transport_others: bool, 
                  preferred_lab_time: str, alt_lab_times: list, past_schools: list):
-        super().__init__(email, name, certification, grades, transportation, transport_others, past_schools)
+        super().__init__(email, name, certifications, transportation, transport_others, past_schools)
         self.preferred_lab_time = preferred_lab_time
         self.alt_lab_times = alt_lab_times
 
@@ -108,9 +100,9 @@ class Stage1And2Student(Student):
 
 
 class Stage3Student(Student):
-    def __init__(self, email: str, name: str, certification: str, grades: list, transportation: bool, transport_others: bool, 
+    def __init__(self, email: str, name: str, certifications: list, transportation: bool, transport_others: bool, 
                  past_schools: list, lab_times: list):
-        super().__init__(email, name, certification, grades, transportation, transport_others, past_schools)
+        super().__init__(email, name, certifications, transportation, transport_others, past_schools)
         self.lab_times = lab_times
 
     def get_lab_times(self):
@@ -121,17 +113,61 @@ class Stage3Student(Student):
 
     def __str__(self):
         return super().__str__() + f'\nLab Times: {self.get_lab_times()}'
-        
-        
+
+
+class Certification:
+    def __init__(self, subject, grades):
+        self.subject = subject
+        self.grades = grades
+
+    def get_subject(self):
+        return self.subject
+
+    def set_subject(self, subject):
+        self.subject = subject
+
+    def get_grades(self):
+        return self.grades
+
+    def set_grades(self, grades):
+        self.grades = grades 
+
+    def __str__(self):
+        return (f'Subject: {self.get_subject()}\n'
+                f'Grades: {self.get_grades()}')
+
+           
+class LabTime:
+    def __init__(self, days, time):
+        self.days = days
+        self.time = time
+
+    def get_days(self):
+        return self.days
+
+    def set_days(self, days):
+        self.days = days
+
+    def get_time(self):
+        return self.time
+
+    def set_time(self, time):
+        self.time = time
+
+    def __str__(self):
+        return (f'Days: {self.get_days()}\n'
+                f'Time: {self.get_time()}')
+
+
 class Teacher:
     """
     Teacher parent class
     """
 
-    def __init__(self, email: str, name: str, school: str, certification: str, grade: str, stage2_times: list, stage3_times: list):
+    def __init__(self, email: str, name: str, school: str, certifications: str, grade: str, stage2_times: list, stage3_times: list):
         self.email = email
         self.name = name
-        self.certification = certification
+        self.certifications = certifications
         self.grade = grade
         self.school = school
         self.stage2_times = stage2_times
@@ -151,11 +187,11 @@ class Teacher:
     def set_name(self, name):
         self.name = name
 
-    def get_certification(self):
-        return self.certification
+    def get_certifications(self):
+        return self.certifications
 
-    def set_certification(self, certification):
-        self.certification = certification
+    def set_certifications(self, certifications):
+        self.certification = certifications
 
     def get_grade(self):
         return self.grade
