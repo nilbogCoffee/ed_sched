@@ -68,8 +68,7 @@ class Student:
     def __str__(self):
         return (f'Email: {self.get_email()}\n'
                 f'Name: {self.get_name()}\n'
-                f'Certification: {self.get_certification()}\n'
-                f'Grades: {self.get_grades()}\n'
+                f'Certification: {self.get_certifications()}\n'
                 f'Transportation: {self.get_trasportaion()}\n'
                 f'Transport Others: {self.get_transport_others()}\n'
                 f'Past Schools: {self.get_past_schools()}')
