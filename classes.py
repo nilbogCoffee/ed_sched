@@ -7,7 +7,6 @@ class Student:
         self.email = email
         self.name = name
         self.certifications = certifications
-        # Certification can be other. Decide later
         self.transportation = transportation
         self.transport_others = transport_others
         self.past_schools = past_schools
@@ -66,15 +65,19 @@ class Student:
         self.email = email
 
     def __str__(self):
+        certifications = ', '.join(map(lambda cert: cert.__str__(), self.get_certifications()))
         return (f'Email: {self.get_email()}\n'
                 f'Name: {self.get_name()}\n'
-                f'Certification: {self.get_certifications()}\n'
+                f'Certification: {certifications}\n'
                 f'Transportation: {self.get_trasportaion()}\n'
                 f'Transport Others: {self.get_transport_others()}\n'
                 f'Past Schools: {self.get_past_schools()}')
 
 
 class Stage1And2Student(Student):
+    """
+    Subclass of Student class. Only difference is preferred lab time and alternate lab times
+    """
     def __init__(self, email: str, name: str, certifications: list, transportation: bool, transport_others: bool, 
                  preferred_lab_time: str, alt_lab_times: list, past_schools: list):
         super().__init__(email, name, certifications, transportation, transport_others, past_schools)
@@ -94,11 +97,15 @@ class Stage1And2Student(Student):
         self.alt_lab_times = times
 
     def __str__(self):
+        alt_lab_times = ', '.join(map(lambda lab_time: lab_time.__str__(), self.get_alt_lab_times()))
         return super().__str__() + (f'\nPreferred Lab Time: {self.get_preferred_lab_time()}'
-                                    f'\nAlternate Lab Times: {self.get_alt_lab_times()}')
+                                    f'\nAlternate Lab Times: {alt_lab_times}')
 
 
 class Stage3Student(Student):
+    """
+    Subclass of Student class for Stage 3 students. Only difference is lab times
+    """
     def __init__(self, email: str, name: str, certifications: list, transportation: bool, transport_others: bool, 
                  past_schools: list, lab_times: list):
         super().__init__(email, name, certifications, transportation, transport_others, past_schools)
@@ -111,10 +118,14 @@ class Stage3Student(Student):
         self.lab_times = times
 
     def __str__(self):
-        return super().__str__() + f'\nLab Times: {self.get_lab_times()}'
+        lab_times = ', '.join(map(lambda time: time.__str__(), self.get_lab_times()))
+        return super().__str__() + f'\nLab Times: {lab_times}'
 
 
 class Certification:
+    """
+    Class for the subject and grades of a certification
+    """
     def __init__(self, subject, grades):
         self.subject = subject
         self.grades = grades
@@ -137,6 +148,9 @@ class Certification:
 
            
 class LabTime:
+    """
+    Class for days and times of labs
+    """
     def __init__(self, days, time):
         self.days = days
         self.time = time

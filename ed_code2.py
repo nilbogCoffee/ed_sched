@@ -1,55 +1,59 @@
 import csv
-# import run_program_GUI
 from classes import Teacher, Certification, LabTime, Stage1And2Student, Stage3Student
 
-def createCertifications(certification): #There are semi-colons in the csv from forms
-    certification_list = []
-    certifications = certification.split(',')
-    for cert in certifications:
-        if cert == 'Other':
-            certification_list.append('Other')
-        else:
-            subject = cert[cert.rfind(' ') + 1:]
-            print(subject)
-            grades = cert[cert.find('(') + 8 : cert.find(')')]
-            if grades[0] == 'K':
-                grades[0] = '0'
-            elif grades[0] == 'PK':
-                grades[0] = '-1'
-            print(grades)
-            grades = grades.split('-')
-            grades = list(range(int(grades[0]), int(grades[-1]) + 1))
-            print(grades)
-            certification_list.append(Certification(subject=subject, grades=grades))
-        
-    return certification_list
+def create_certifications(certification): #There are semi-colons in the csv from forms
+    """
+    Create certification objects from a list of certifications from a student using their certified grades and subjects
+    """
+    return [create_certification(cert) for cert in certification.split(', ')]
 
 
-def createTimes(times, end_index):
-    times = times.split(',')
-    lab_times =[]
-    for time in times:
-        print(time)
-        if 'None' not in time:
-            days = time[7:end_index].split('/')
-            print(days)
-            time = time[end_index+1:]
-            print(time)
-            lab_time = LabTime(days=days, time=time)
-            print(lab_time)
-            lab_times.append(lab_time)
+def create_certification(certification):
+    """
+    Creates one certification object from subject and grade
+    """
+    def get_subject():
+        return certification[certification.rfind(':') + 2:]
 
-    return lab_times
+    def get_grades():
+        grades = certification[certification.find('(') + 8 : certification.find(')')]
+        if grades[0] == 'K':
+            grades[0] = '0'
+        elif grades[0] == 'P':
+            grades = grades.replace('PK', '-1')
+        grades = grades.rsplit('-', 1)
+        return list(range(int(grades[0]), int(grades[1]) + 1))
+    
+    return Certification(subject=get_subject(), grades=get_grades()) if certification != 'Other' else 'Other'
+
+
+def create_times(times, end_index):
+    """
+    Create lab time objects based on the day and time of the list of labs from a student
+    """
+    return [create_time(time, end_index) for time in times.split(', ') if times and 'None' not in time]
+
+
+def create_time(time, end_index):
+    """
+    Create a single LabTime object based on the day and time of the lab
+    """
+    def get_days():
+        return time[7:end_index].split('/')
+
+    def get_time():
+        return time[end_index+1:]
+    
+    return LabTime(days=get_days(), time=get_time())
 
 
 def make_students(file_name):
     """
-    Create all student objects from the Tidy_Ed_Data_Teachers.csv file
+    Create all student objects from the file
     """
     student_list = []
     students = csv.DictReader(open(file_name, encoding='utf-8-sig'))   # Need encoding field to delete the Byte Order Mark (BOM)
     for student in students:
-        print('\n new student incoming \n')
         email = student['Email Address']
         first_name = student['First Name']
         last_name = student['Last Name']
@@ -57,18 +61,15 @@ def make_students(file_name):
         certification = student['Certification(s)']
         transportation = student['Transportation']
         transport_others = student['Transport Others']
-        past_schools = [student['School 1'].lower(), 
-                        student['School 2'].lower(), 
-                        student['School 3'].lower(), 
-                        student['School 4'].lower()]
-
-        certification = createCertifications(certification)
+        past_schools = list(map(lambda school: school.lower(), [student['School 1'], 
+                                                                student['School 2'], 
+                                                                student['School 3'], 
+                                                                student['School 4']]))
+        certification = create_certifications(certification)
 
         if stage == 'Stage 1 & 2':
-            preferred_time = student['Preferred Time']
-            alternate_times = student['Alternate Time']
-            all_times = preferred_time + ',' + alternate_times
-            lab_times = createTimes(all_times, 9)
+            all_lab_times = student['Preferred Time'] + ', ' + student['Alternate Time']
+            lab_times = create_times(all_lab_times, 10)
 
             new_student = Stage1And2Student(email=email,
                                             name=first_name + ' ' + last_name,
@@ -79,33 +80,18 @@ def make_students(file_name):
                                             alt_lab_times = lab_times[1:],
                                             past_schools=past_schools)
 
-            print(new_student)
         elif stage == 'Stage 3':
             time_260 = student['260 Time']
             time_360 = student['360-366 Time']
             time_368 = student['368 Time']
             time_3582 = student['358.2 Time']
-            lab_times = []
+            lab_times = create_times(time_260, 10) + create_times(time_360, 16) + create_times(time_368,12)
 
-            if time_260:
-                lab_times += createTimes(time_260, 9)
-
-            if time_360:
-                lab_times += createTimes(time_360, 16)
-
-            if time_368:
-                lab_times += createTimes(time_368,12)
-
-            if time_3582:
-                times = time_3582.split(',')
-                for time in times:
-                    if 'A' in time:
-                        days = time[7:12].split('/')
-                        lab_time = time[13:]
-                    else:
-                        days = time[7:9]
-                        lab_time = time[10:]
-                    lab_times += LabTime(days=days, time=lab_time)
+            for time in time_3582.split(','):
+                if 'A' in time:
+                    lab_times.append(create_time(time, 12))
+                elif time:
+                    lab_times.append(create_time(time, 10))
             
             new_student = Stage3Student(email=email,
                                         name=first_name + ' ' + last_name,
@@ -256,9 +242,10 @@ def write_extra_students(students):
 
 
 def main():
-    students = make_students("Field Experiences.csv")
+    students = make_students("sheetsFile.csv")
     # teachers = make_teachers("Tidy_Ed_Data_Teachers.csv")
     for student in students:
+        print()
         print(student)
 
     # print()
