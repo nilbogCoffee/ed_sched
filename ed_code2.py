@@ -61,7 +61,7 @@ def make_students(file_name):
         certification = student['Certification(s)']
         transportation = student['Transportation']
         transport_others = student['Transport Others']
-        past_schools = [student['School 1'], student['School 2'], student['School 3'], student['School 4']]
+        past_schools = [student['School 1'].lower(), student['School 2'].lower(), student['School 3'].lower(), student['School 4'].lower()]
 
         certification = create_certifications(certification)
 
@@ -76,7 +76,7 @@ def make_students(file_name):
                                             transport_others=transport_others == 'Yes',
                                             preferred_lab_time=lab_times[0],
                                             alt_lab_times = lab_times[1:],
-                                            past_schools=list(map(lambda school: school.lower(), past_schools)))
+                                            past_schools=past_schools)
 
         elif stage == 'Stage 3':
             time_260 = student['260 Time']
@@ -97,7 +97,7 @@ def make_students(file_name):
                                         transportation=transportation == 'Yes',
                                         transport_others=transport_others == 'Yes',
                                         lab_times=lab_times,
-                                        past_schools=list(map(lambda school: school.lower(), past_schools)))
+                                        past_schools=past_schools)
 
         student_list.append(new_student)
 
