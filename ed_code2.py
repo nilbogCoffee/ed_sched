@@ -51,7 +51,8 @@ def make_students(file_name):
     """
     Create all student objects from the file
     """
-    student_list = []
+    stage_1_and_2_students = []
+    stage_3_students = []
     students = csv.DictReader(open(file_name, encoding='utf-8-sig'))   # Need encoding field to delete the Byte Order Mark (BOM)
     for student in students:
         email = student['Email Address']
@@ -77,11 +78,12 @@ def make_students(file_name):
                                             preferred_lab_time=lab_times[0],
                                             alt_lab_times = lab_times[1:],
                                             past_schools=past_schools)
+            stage_1_and_2_students.append(new_student)
 
         elif stage == 'Stage 3':
             time_260 = student['260 Time']
             time_360 = student['360-366 Time']
-            time_368 = student['368 Time']
+            time_368 = student['368 Time'] 
             time_3582 = student['358.2 Time']
             lab_times = create_times(time_260, 10) + create_times(time_360, 16) + create_times(time_368,12)
 
@@ -99,9 +101,9 @@ def make_students(file_name):
                                         lab_times=lab_times,
                                         past_schools=past_schools)
 
-        student_list.append(new_student)
+            stage_3_students.append(new_student)
 
-    return student_list
+    return stage_1_and_2_students, stage_3_students
 
 
 def make_teachers(file_name):
@@ -240,9 +242,12 @@ def write_extra_students(students):
 
 
 def main():
-    students = make_students("sheetsFile.csv")
+    stage_1_and_2_students, stage_3_students = make_students("sheetsFile.csv")
     # teachers = make_teachers("Tidy_Ed_Data_Teachers.csv")
-    for student in students:
+    for student in stage_1_and_2_students:
+        print()
+        print(student)
+    for student in stage_3_students:
         print()
         print(student)
 
@@ -262,9 +267,7 @@ if __name__ == '__main__':
 
 
 """
-TODO:
-1. Ask Mrs. Correll to fix the original file with correct headers and proper formatting (Google Form)
-2. Make another file called Main that runs the program and remove the main function from this file
-3. Write bash script to actually run the program so that a user can execute program on double click of the bash script
-4. Add GUI so that user can choose files from their Finder Menu (This is partially done. Not visually appealing)
+TODO: 
+1. Write bash script to actually run the program so that a user can execute program on double click of the bash script
+2. Make GUI visually appealing and check for user error
 """
