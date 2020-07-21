@@ -123,7 +123,7 @@ def make_teachers(file_name):
                               name=name,
                               school=school, #district if district != 'Other' else other_district
                               certification=certification,
-                              grade=grade,
+                              grade=grade, # Formatted differently check
                               stage2_times=create_times(stage_1_and_2_times),
                               stage3_times=create_times(stage_3_times))
 
@@ -132,29 +132,53 @@ def make_teachers(file_name):
     return teacher_list
 
 
-def check_subject(student, teacher):
-    """Check the student and teacher subjects are equal"""
-    return student.get_subject() == teacher.get_subject()
+def check_certification(student, teacher):
+    student_certifications = student.get_certifications()
+    teacher_subject = teacher.get_certification()
+    teacher_grade = teacher.get_grade()
+
+    for cert in student_certifications:
+        if cert.get_subject() == teacher_subject and teacher.get_grade() in cert.get_grades():
+            return True
+
+    return False
 
 
-def check_grade(student, teacher):
-    """Check that the teacher grade is in the student's certified grades"""
-    return teacher.get_grade() in student.get_grades()
+def check_stage_1_and_2_preferred(student, teacher):
+    preferred_time = student.get_preferred_time()
+    teacher_times = teacher.get_stage2_times()
+    return preferred_time in teacher_times
 
 
-def check_availability(student, teacher):
+def check_stage_1_and_2_alternate(student, teacher):
     """Check that the teacher's availability is in the student's availability"""
-    return teacher.get_availability() in student.get_availability()
+    student_times = student.get_alternate_times()
+    teacher_times = teacher.get_stage2_times()
+    for time in student_times:
+        if time in teacher_times:
+            return True
+
+    return False
+
+
+def check_stage_3_times(student, teacher):
+    student_times = student.get_lab_times()
+    teacher_times = teacher.get_stage3_times()
+    for time in student_times:
+        if time in teacher_times:
+            return True
+
+    return False
 
 
 def check_school(student, teacher):
     """Check that the teacher's school is not in the students list of previous schools"""
-    return teacher.get_school() in student.get_experience()
+    return teacher.get_school() in student.get_schools()
 
 
 def check_transport(student, teacher):
     """Check that the student can drive or walk"""
-    return student.get_can_drive() or teacher.get_can_walk()
+    return student.get_transportation()
 
 
 def print_sched(teachers):
@@ -175,6 +199,7 @@ def perform_checks(student, teacher):
     Perform all checks between student and teacher to see if they are compatible
     Returns a tuple of whether the match is found and whether the student can commute
     """
+    # Start here next time
     subject = check_subject(student, teacher)
     grade = check_grade(student, teacher)
     availability = check_availability(student, teacher)
