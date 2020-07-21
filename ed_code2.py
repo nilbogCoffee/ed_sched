@@ -1,14 +1,14 @@
 import csv
 from classes import Teacher, Certification, LabTime, Stage1And2Student, Stage3Student
 
-def create_certifications(certification): #There are semi-colons in the csv from forms
+def create_student_certifications(certification): #There are semi-colons in the csv from forms
     """
     Create certification objects from a list of certifications from a student using their certified grades and subjects
     """
-    return [create_certification(cert) for cert in certification.split(', ')]
+    return [create_student_certification(cert) for cert in certification.split(', ')]
 
 
-def create_certification(certification):
+def create_student_certification(certification):
     """
     Creates one certification object from subject and grade
     """
@@ -27,19 +27,20 @@ def create_certification(certification):
     return Certification(subject=get_subject(), grades=get_grades()) if certification != 'Other' else 'Other'
 
 
-def create_times(times, end_index):
+def create_times(times):
     """
     Create lab time objects based on the day and time of the list of labs from a student
     """
-    return [create_time(time, end_index) for time in times.split(', ') if times and 'None' not in time]
+    return [create_time(time) for time in times.split(', ') if times and 'None' not in time]
 
 
-def create_time(time, end_index):
+def create_time(time):
     """
     Create a single LabTime object based on the day and time of the lab
     """
+    end_index = time.rfind(' ')
     def get_days():
-        return time[7:end_index].split('/')
+        return time[time.find(':')+2 : end_index].split('/')
 
     def get_time():
         return time[end_index+1:]
@@ -64,11 +65,11 @@ def make_students(file_name):
         transport_others = student['Transport Others']
         past_schools = [student['School 1'].lower(), student['School 2'].lower(), student['School 3'].lower(), student['School 4'].lower()]
 
-        certification = create_certifications(certification)
+        certification = create_student_certifications(certification)
 
         if stage == 'Stage 1 & 2':
             all_lab_times = student['Preferred Time'] + ', ' + student['Alternate Time']
-            lab_times = create_times(all_lab_times, 10)
+            lab_times = create_times(all_lab_times)
 
             new_student = Stage1And2Student(email=email,
                                             name=first_name + ' ' + last_name,
@@ -85,13 +86,7 @@ def make_students(file_name):
             time_360 = student['360-366 Time']
             time_368 = student['368 Time'] 
             time_3582 = student['358.2 Time']
-            lab_times = create_times(time_260, 10) + create_times(time_360, 16) + create_times(time_368,12)
-
-            for time in time_3582.split(','):
-                if 'A' in time:
-                    lab_times.append(create_time(time, 12))
-                elif time:
-                    lab_times.append(create_time(time, 10))
+            lab_times = create_times(time_260) + create_times(time_360) + create_times(time_368) + create_times(time_3582)
             
             new_student = Stage3Student(email=email,
                                         name=first_name + ' ' + last_name,
@@ -114,13 +109,25 @@ def make_teachers(file_name):
     teachers = csv.DictReader(open(file_name, encoding='utf-8-sig'))   # Need encoding field to delete the Byte Order Mark (BOM)
     fieldnames = teachers.fieldnames    # Gets the fieldnames from the csv file so we do not have to hardcode values
     for teacher in teachers:
-        teacher = Teacher(name=teacher[fieldnames[0]],
-                          subject=teacher[fieldnames[1]],
-                          grade=teacher[fieldnames[2]],
-                          school=teacher[fieldnames[3]],
-                          availability=teacher[fieldnames[4]],
-                          can_walk=teacher[fieldnames[5]] == 'Yes')
-        teacher_list.append(teacher)
+        email = teacher['Email address']
+        name = teacher['Teacher\'s Full Name']
+        school = teacher['School Name']
+        certification = teacher['Subject']
+        grade = teacher['Grade']
+        district = teacher['District/Entity'] # Eventually
+        other_district = teacher.get('If Other, please indicate district')
+        stage_3_times = teacher['Stage 3 Lab']
+        stage_1_and_2_times = teacher['Stage 1 & 2 Lab']
+
+        new_teacher = Teacher(email=email,
+                              name=name,
+                              school=school, #district if district != 'Other' else other_district
+                              certification=certification,
+                              grade=grade,
+                              stage2_times=create_times(stage_1_and_2_times),
+                              stage3_times=create_times(stage_3_times))
+
+        teacher_list.append(new_teacher)
     
     return teacher_list
 
@@ -243,7 +250,7 @@ def write_extra_students(students):
 
 def main():
     stage_1_and_2_students, stage_3_students = make_students("sheetsFile.csv")
-    # teachers = make_teachers("Tidy_Ed_Data_Teachers.csv")
+    teachers = make_teachers("teachers.csv")
     for student in stage_1_and_2_students:
         print()
         print(student)
@@ -252,8 +259,8 @@ def main():
         print(student)
 
     # print()
-    # for teacher in teachers:
-    #     print(teacher)
+    for teacher in teachers:
+        print(teacher)
 
     # print()
     # matchmaker(students, teachers)

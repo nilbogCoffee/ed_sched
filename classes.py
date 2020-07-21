@@ -25,7 +25,7 @@ class Student:
     def set_certifications(self, certifications):
         self.certifications = certifications
 
-    def get_trasportaion(self):
+    def get_transportation(self):
         return self.transportation
 
     def set_transportation(self, transportation):
@@ -69,7 +69,7 @@ class Student:
         return (f'Email: {self.get_email()}\n'
                 f'Name: {self.get_name()}\n'
                 f'Certification: {certifications}\n'
-                f'Transportation: {self.get_trasportaion()}\n'
+                f'Transportation: {self.get_transportation()}\n'
                 f'Transport Others: {self.get_transport_others()}\n'
                 f'Past Schools: {self.get_past_schools()}')
 
@@ -177,10 +177,10 @@ class Teacher:
     Teacher parent class
     """
 
-    def __init__(self, email: str, name: str, school: str, certifications: str, grade: str, stage2_times: list, stage3_times: list):
+    def __init__(self, email: str, name: str, school: str, certification: str, grade: str, stage2_times: list, stage3_times: list):
         self.email = email
         self.name = name
-        self.certifications = certifications
+        self.certification = certification
         self.grade = grade
         self.school = school
         self.stage2_times = stage2_times
@@ -200,11 +200,11 @@ class Teacher:
     def set_name(self, name):
         self.name = name
 
-    def get_certifications(self):
-        return self.certifications
+    def get_certification(self):
+        return self.certification
 
-    def set_certifications(self, certifications):
-        self.certification = certifications
+    def set_certification(self, certification):
+        self.certification = certification
 
     def get_grade(self):
         return self.grade
@@ -243,11 +243,13 @@ class Teacher:
         self.student = student
     
     def __str__(self):
-        return str({'email': self.get_email(),
-                    'name': self.get_name(),
-                    'certification': self.get_certification(),
-                    'grade': self.get_grade(),
-                    'stage2 times': self.get_stage2_times(),
-                    'stage3 times': self.get_stage3_times(),
-                    'school': self.get_school(),
-                    'student': self.get_student()})
+        stage2times = ', '.join(map(lambda lab_time: lab_time.__str__(), self.get_stage2_times()))
+        stage3times = ', '.join(map(lambda lab_time: lab_time.__str__(), self.get_stage3_times()))
+        return (f'Email: {self.get_email()}\n'
+                f'Name: {self.get_name()}\n'
+                f'Certification: {self.get_certification()}\n'
+                f'Grade: {self.get_grade()}\n'
+                f'Stage2 Times: {stage2times}\n'
+                f'Stage3 Times: {stage3times}\n'
+                f'School: {self.get_school()}\n'
+                f'Student: {self.get_student()}\n')
