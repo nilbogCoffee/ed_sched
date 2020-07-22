@@ -133,47 +133,70 @@ def make_teachers(file_name):
 
 
 def check_certification(student, teacher):
-    student_certifications = student.get_certifications()
-    teacher_subject = teacher.get_certification()
-    teacher_grade = teacher.get_grade()
+    """
+    Check if teacher grade and subject are in one of the student's certifications
+    """
+    # student_certifications = student.get_certifications()
+    # teacher_subject = teacher.get_certification()
+    # teacher_grade = teacher.get_grade()
 
-    for cert in student_certifications:
-        if cert.get_subject() == teacher_subject and teacher.get_grade() in cert.get_grades():
-            return True
+    # for cert in student_certifications:
+    #     if cert.get_subject() == teacher_subject and teacher.get_grade() in cert.get_grades():
+    #         return True
 
-    return False
+    # return False
+    return any([cert.get_subject() == teacher.get_certification() and 
+                teacher.get_grade() in cert.get_grades() 
+                for cert in student.get_certifications()])
+    # Use filter to return time if needed
+    # return list(filter(lambda cert: cert.get_subject() == teacher.get_certification() and teacher.get_grade() in cert.get_grades(), 
+    #                    student.get_certifications()))
 
 
 def check_stage_1_and_2_preferred(student, teacher):
-    preferred_time = student.get_preferred_time()
-    teacher_times = teacher.get_stage2_times()
-    return preferred_time in teacher_times
-
+    """
+    Only used for stage 1 and 2 students for preferred times.
+    This function will be used after stage 3 students are handled
+    """
+    return student.get_preferred_time() in teacher.get_stage2_times()
+    # return student.get_preferred_time() if student.get_preferred_time() in teacher.get_stage2_times() else ''
 
 def check_stage_1_and_2_alternate(student, teacher):
-    """Check that the teacher's availability is in the student's availability"""
-    student_times = student.get_alternate_times()
-    teacher_times = teacher.get_stage2_times()
-    for time in student_times:
-        if time in teacher_times:
-            return True
+    """
+    Only used for stage 1 and 2 students for there alternate times
+    This function is used after preferred times are handled for all students
+    """
+    # student_times = student.get_alternate_times()
+    # teacher_times = teacher.get_stage2_times()
+    # for time in student_times:
+    #     if time in teacher_times:
+    #         return True
 
-    return False
-
+    # return False
+    return any([time in teacher.get_stage2_times() for time in student.get_alternate_times()])
+    # return list(filter(lambda ele: ele in teacher.get_stage2_times(), student.get_alternate_times()))
+    
 
 def check_stage_3_times(student, teacher):
-    student_times = student.get_lab_times()
-    teacher_times = teacher.get_stage3_times()
-    for time in student_times:
-        if time in teacher_times:
-            return True
+    """
+    Only used for stage 3 students for there lab times
+    This function is used first before stage 1 & 2 students are considered
+    """
+    # student_times = student.get_lab_times()
+    # teacher_times = teacher.get_stage3_times()
+    # for time in student_times:
+    #     if time in teacher_times:
+    #         return True
 
-    return False
-
+    # return False
+    return any([time in teacher.get_stage3_times() for time in student.get_lab_times()])
+    # Use filter to return time if needed
+    # return list(filter(lambda time: time in teacher.get_stage3_times(), student.get_lab_times()))
 
 def check_school(student, teacher):
     """Check that the teacher's school is not in the students list of previous schools"""
     return teacher.get_school() in student.get_schools()
+    # return teacher.get_school() if teacher.get_school() not in student.get_schools() else ''
 
 
 def check_transport(student, teacher):
@@ -194,7 +217,7 @@ def print_sched(teachers):
         #     print(f"{teacher.get_name()} has no student.")
 
 
-def perform_checks(student, teacher):
+def perform_checks(student, teacher, alternate_time):
     """
     Perform all checks between student and teacher to see if they are compatible
     Returns a tuple of whether the match is found and whether the student can commute
@@ -202,13 +225,20 @@ def perform_checks(student, teacher):
     # Start here next time
     subject = check_subject(student, teacher)
     grade = check_grade(student, teacher)
-    availability = check_availability(student, teacher)
     school = check_school(student, teacher)
     teacher_is_taken = teacher.get_match_found()
     student_can_commute = check_transport(student, teacher)
+    if isinstance(student, Stage3Student):
+        pass
+    elif isinstance(student, Stage1And2Student) and alternate_time:
+        pass
+    else:
+        pass
+    availability = check_availability(student, teacher) # Change based on which instance is passed in
+    
 
     return subject and grade and availability and not school and not teacher_is_taken, student_can_commute
-
+    # Maybe return actual values
 
 def match_found(student, teacher):
     """Match found between student and teacher. Sets the teacher's student. Overwrites the student's availability"""
@@ -218,7 +248,7 @@ def match_found(student, teacher):
     student.set_availability(teacher.get_availability())  # Overwrite the student's availability to the teacher's availability
 
 
-def matchmaker(students, teachers):
+def matchmaker(students, teachers, alternate_time=False):
     """
     Determines which students are matches with each teacher by each student object attribute
     This is the main function that this program is centered around
@@ -226,7 +256,7 @@ def matchmaker(students, teachers):
     students_need_ride = []
     for student in students:
         for teacher in teachers:
-            student_matches_teacher, student_can_commute = perform_checks(student, teacher)
+            student_matches_teacher, student_can_commute = perform_checks(student, teacher, alternate_time)
             
             if student_matches_teacher:
                 match_found(student, teacher)
@@ -288,7 +318,9 @@ def main():
         print(teacher)
 
     # print()
-    # matchmaker(students, teachers)
+    # matchmaker(stage_3_students, teachers)
+    # matchmaker(stage_1_and_2_students, teachers)
+    # matchmaker(stage_1_and_2_students, teachers, alternate_time=True)
 
     # write_schedule(teachers)
     # write_extra_students(students)
