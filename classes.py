@@ -177,11 +177,10 @@ class Teacher:
     Teacher parent class
     """
 
-    def __init__(self, email: str, name: str, school: str, certification: str, grade: str, stage2_times: list, stage3_times: list):
+    def __init__(self, email: str, name: str, school: str, certification: str, stage2_times: list, stage3_times: list):
         self.email = email
         self.name = name
         self.certification = certification
-        self.grade = grade
         self.school = school
         self.stage2_times = stage2_times
         self.stage3_times = stage3_times
@@ -205,12 +204,6 @@ class Teacher:
 
     def set_certification(self, certification):
         self.certification = certification
-
-    def get_grade(self):
-        return self.grade
-
-    def set_grade(self, grade):
-        self.grade = grade
 
     def get_stage2_times(self):
         return self.stage2_times
@@ -248,7 +241,6 @@ class Teacher:
         return (f'Email: {self.get_email()}\n'
                 f'Name: {self.get_name()}\n'
                 f'Certification: {self.get_certification()}\n'
-                f'Grade: {self.get_grade()}\n'
                 f'Stage2 Times: {stage2times}\n'
                 f'Stage3 Times: {stage3times}\n'
                 f'School: {self.get_school()}\n'
