@@ -170,20 +170,22 @@ def check_certification(student, teacher):
     teacher_grade = teacher_certification.get_grades()
     print('teacher grade:', teacher_grade)
 
-    for cert in student_certifications:
-        print('student cert:', cert)
-        # print('cert subject:', cert.get_subject())
-        # print('cert grade:', cert.get_grades())
-        if cert.get_subject() == teacher_subject and all(grade in cert.get_grades() for grade in teacher_grade):
-            return True
+    # for cert in student_certifications:
+    #     print('student cert:', cert)
+    #     # print('cert subject:', cert.get_subject())
+    #     # print('cert grade:', cert.get_grades())
+    #     if cert.get_subject() == teacher_subject and all(grade in cert.get_grades() for grade in teacher_grade):
+    #         return True
 
-    return False
+    # return False
+
     # return any([cert.get_subject() == teacher_subject and 
     #             all(grade in cert.get_grades() for grade in teacher_grade) 
     #             for cert in student.get_certifications()])
+
     # Use filter to return time if needed
-    # return list(filter(lambda cert: cert.get_subject() == teacher_subject and all(grade in cert.get_grades() for grade in teacher_grade), 
-    #                    student.get_certifications()))
+    return list(filter(lambda cert: cert.get_subject() == teacher_subject and all(grade in cert.get_grades() for grade in teacher_grade), 
+                       student.get_certifications()))
 
 
 def check_stage_1_and_2_preferred(student, teacher):
@@ -215,9 +217,12 @@ def check_stage_3_times(student, teacher):
     Only used for stage 3 students for there lab times
     This function is used first before stage 1 & 2 students are considered
     """
-    # student_times = student.get_lab_times()
-    # teacher_times = teacher.get_stage3_times()
+    student_times = student.get_lab_times()
+    teacher_times = teacher.get_stage3_times()
+    # print(student_times)
+    # print(teacher_times[1])
     # for time in student_times:
+    #     print(time)
     #     if time in teacher_times:
     #         return True
 
@@ -262,8 +267,10 @@ def perform_checks(student, teacher, alternate_time):
     print(school)
     teacher_is_taken = teacher.get_match_found()
     student_can_commute = check_transport(student, teacher)
+    print(student_can_commute)
     if isinstance(student, Stage3Student):
-        pass
+        lab_time = check_stage_3_times(student, teacher)
+        print(lab_time)
     elif isinstance(student, Stage1And2Student) and alternate_time:
         pass
     else:

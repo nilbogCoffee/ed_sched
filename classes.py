@@ -167,6 +167,9 @@ class LabTime:
     def set_time(self, time):
         self.time = time
 
+    def __eq__(self, other):
+        return self.days == other.days and self.time == other.time if isinstance(other, LabTime) else False
+
     def __str__(self):
         return (f'Days: {self.get_days()}\n'
                 f'Time: {self.get_time()}')
