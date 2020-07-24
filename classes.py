@@ -64,6 +64,12 @@ class Student:
     def set_email(self, email):
         self.email = email
 
+    def get_lab_times(self):
+        return self.lab_times
+
+    def set_lab_times(self, lab_times):
+        self.lab_times = lab_times
+
     def __str__(self):
         certifications = ', '.join(map(lambda cert: cert.__str__(), self.get_certifications()))
         return (f'Email: {self.get_email()}\n'
@@ -83,6 +89,7 @@ class Stage1And2Student(Student):
         super().__init__(email, name, certifications, transportation, transport_others, past_schools)
         self.preferred_lab_time = preferred_lab_time
         self.alt_lab_times = alt_lab_times
+        self.lab_times = [self.preferred_lab_time] + self.alt_lab_times
 
     def get_preferred_lab_time(self):
         return self.preferred_lab_time
@@ -95,6 +102,12 @@ class Stage1And2Student(Student):
 
     def set_alt_lab_times(self, times):
         self.alt_lab_times = times
+
+    # def get_lab_times(self):
+    #     return self.all_lab_times
+
+    # def set_lab_times(self, lab_times):
+    #     self.all_lab_times = lab_times
 
     def __str__(self):
         alt_lab_times = ', '.join(map(lambda lab_time: lab_time.__str__(), self.get_alt_lab_times()))
@@ -111,11 +124,11 @@ class Stage3Student(Student):
         super().__init__(email, name, certifications, transportation, transport_others, past_schools)
         self.lab_times = lab_times
 
-    def get_lab_times(self):
-        return self.lab_times
+    # def get_lab_times(self):
+    #     return self.lab_times
 
-    def set_lab_times(self, times):
-        self.lab_times = times
+    # def set_lab_times(self, times):
+    #     self.lab_times = times
 
     def __str__(self):
         lab_times = ', '.join(map(lambda time: time.__str__(), self.get_lab_times()))
@@ -219,6 +232,9 @@ class Teacher:
 
     def set_stage3_times(self, times):
         self.stage3_times = times
+
+    def get_all_lab_times(self):
+        return self.get_stage2_times() + self.get_stage3_times()
 
     def get_school(self):
         return self.school
