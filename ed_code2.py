@@ -47,7 +47,8 @@ def create_time(time, other):
     return LabTime(days=get_days(), time=get_time()) if time != 'Other' else other
 
 
-def convert_grade(grade):
+def convert_grade(grade): #not gonna stay, serves its purpose for now
+    # grade.isspace() returns if grade is all whitespaces
     if grade[:2] == 'PK':
         grade = [-1]
     elif grade == 'Kindergarten':
@@ -189,8 +190,8 @@ def check_stage_1_and_2_preferred(student, teacher):
     Only used for stage 1 and 2 students for preferred times.
     This function will be used after stage 3 students are handled
     """
-    return student.get_preferred_time() in teacher.get_stage2_times()
-    # return student.get_preferred_time() if student.get_preferred_time() in teacher.get_stage2_times() else ''
+    # return student.get_preferred_lab_time() in teacher.get_stage2_times()
+    return [student.get_preferred_lab_time()] if student.get_preferred_lab_time() in teacher.get_stage2_times() else ''
 
 def check_stage_1_and_2_alternate(student, teacher):
     """
@@ -226,6 +227,7 @@ def check_stage_3_times(student, teacher):
     # return any(time in teacher.get_stage3_times() for time in student.get_lab_times())
     # Use filter to return time if needed
     return list(filter(lambda time: time in teacher.get_stage3_times(), student.get_lab_times()))
+
 
 def check_school(student, teacher):
     """Check that the teacher's school is not in the students list of previous schools"""
@@ -307,7 +309,9 @@ def matchmaker(students, teachers, alternate_time=False):
     students_need_ride = []
     for student in students:
         for teacher in teachers:
-            if not teacher.get_match_found():
+            if not teacher.get_match_found() and not student.get_match_found():
+                print(student)
+                print(teacher)
                 certification, previous_school, lab_times, can_commute = perform_checks(student, teacher, alternate_time)
                 print(certification, previous_school, lab_times, can_commute)
                 if certification and lab_times and not previous_school:
@@ -358,8 +362,8 @@ def write_extra_students(students):
 
 
 def main():
-    stage_1_and_2_students, stage_3_students = make_students("Student Field Experiences Stage 3.csv")
-    teachers = make_teachers("Teacher Field Experiences Stage 3.csv")
+    stage_1_and_2_students, stage_3_students = make_students("Student Field Experiences Stage 1 and 2.csv")
+    teachers = make_teachers("Teacher Field Experiences Stage 1 and 2.csv")
     for student in stage_1_and_2_students:
         print()
         print(student)
@@ -367,13 +371,13 @@ def main():
         print()
         print(student)
 
-    print()
+    # print()
     for teacher in teachers:
         print(teacher)
 
-    print()
+    # print()
     matchmaker(stage_3_students, teachers) # all done for stage 3 students. Not tested well enough yet though
-    # matchmaker(stage_1_and_2_students, teachers)
+    matchmaker(stage_1_and_2_students, teachers)
     # matchmaker(stage_1_and_2_students, teachers, alternate_time=True)
 
     # write_schedule(teachers)
