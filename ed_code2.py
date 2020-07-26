@@ -79,9 +79,9 @@ def make_students(file_name):
         stage = student['Stage']
         certification = student['Certification(s)']
         other_certification = student['If Other, indicate certification']
-        # print(certification)
         transportation = student['Transportation']
         transport_others = student['Transport Others']
+        transportation_comments = student['Transportation Comments']
         past_schools = [student['District Code 1'],
                         student['District Code 2'],
                         student['District Code 3'],
@@ -93,6 +93,7 @@ def make_students(file_name):
             alternate_times = student['Alternate Time']
             other_preferred_time = student['If Other, indicate preferred lab time']
             other_alternate_times = student['If Other, indicate alternate lab time']
+            lab_comments = student['Stage 1&2 Comments']
 
             new_student = Stage1And2Student(email=email,
                                             name=first_name + ' ' + last_name,
@@ -101,7 +102,9 @@ def make_students(file_name):
                                             transport_others=transport_others == 'Yes',
                                             preferred_lab_time=create_time(preferred_time, other_preferred_time),
                                             alt_lab_times=create_times(alternate_times, other_alternate_times),
-                                            past_schools=past_schools)
+                                            past_schools=past_schools,
+                                            transportation_comments=transportation_comments,
+                                            lab_comments=lab_comments)
             stage_1_and_2_students.append(new_student)
 
         elif stage == 'Stage 3':
@@ -113,6 +116,7 @@ def make_students(file_name):
             other_time_368 = student['If Other, indicate EDUC 368 lab time']
             time_3582 = student['358.2 Time']
             other_time_3582 = student['If Other, indicate EDUC 358.2 lab time']
+            lab_comments = student['Stage 3 Lab Comments']
 
             lab_times = create_times(time_260, other_time_260) + create_times(time_360, other_time_360) + \
                         create_times(time_368, other_time_368) + create_times(time_3582, other_time_3582)
@@ -123,7 +127,9 @@ def make_students(file_name):
                                         transportation=transportation == 'Yes',
                                         transport_others=transport_others == 'Yes',
                                         lab_times=lab_times,
-                                        past_schools=past_schools)
+                                        past_schools=past_schools,
+                                        transportation_comments=transportation_comments,
+                                        lab_comments=lab_comments)
 
             stage_3_students.append(new_student)
 
@@ -205,8 +211,8 @@ def check_stage_1_and_2_alternate(student, teacher):
     #         return True
 
     # return False
-    return any(time in teacher.get_stage2_times() for time in student.get_alternate_times())
-    # return list(filter(lambda ele: ele in teacher.get_stage2_times(), student.get_alternate_times()))
+    # return any(time in teacher.get_stage2_times() for time in student.get_alt_lab_times())
+    return list(filter(lambda ele: ele in teacher.get_stage2_times(), student.get_alt_lab_times()))
     
 
 def check_stage_3_times(student, teacher):
@@ -232,7 +238,6 @@ def check_stage_3_times(student, teacher):
 def check_school(student, teacher):
     """Check that the teacher's school is not in the students list of previous schools"""
     return teacher.get_school() in student.get_past_schools()
-    # return teacher.get_school() if teacher.get_school() not in student.get_past_schools() else ''
 
 
 def check_transport(student, teacher):
@@ -297,7 +302,7 @@ def match_found(student, teacher, lab_times):
         teacher.set_stage2_times(lab_times)
         teacher.set_stage3_times([])
 
-    student.set_lab_times(lab_times)
+    student.set_lab_times(lab_times) # why
 
 
 def matchmaker(students, teachers, alternate_time=False):
@@ -305,7 +310,7 @@ def matchmaker(students, teachers, alternate_time=False):
     Determines which students are matches with each teacher by each student object attribute
     This is the main function that this program is centered around
     """
-    stage_3_leftover = []
+    stage_3_leftover = [] # do leftover
     students_need_ride = []
     for student in students:
         for teacher in teachers:
@@ -337,15 +342,25 @@ def assign_drivers(students_need_ride, all_students):
 def write_schedule(teachers):
     """Write results to csv file"""
     with open("sched.csv", "w") as schedule:
-        writer = csv.DictWriter(schedule, fieldnames=["Student", "Teacher", "School", "Lab"])
+        writer = csv.DictWriter(schedule, fieldnames=["Student Name", "Teacher Name", "District", "Subject", "Lab(s)", 
+                                                      "Grade", "Transportation", "Transport Others", "Potential Drivers",
+                                                      "Transportation Comments", "Lab Comments"])
         writer.writeheader()
 
         for teacher in teachers:
-            if teacher.get_match_found():
-                writer.writerow({"Student": teacher.get_student().get_name(), 
-                                 "Teacher": teacher.get_name(), 
-                                 "School": teacher.get_school(),
-                                 "Lab": teacher.get_availability()})
+            if teacher.get_match_found():                
+                student = teacher.get_student()
+                writer.writerow({"Student Name": student.get_name(), 
+                                 "Teacher Name": teacher.get_name(), 
+                                 "District": teacher.get_school(),
+                                 "Subject": teacher.get_certification().get_subject(),
+                                 "Lab(s)": ', '.join(map(str, teacher.get_all_lab_times())),
+                                 "Grade": ', '.join(map(str, teacher.get_certification().get_grades())),
+                                 "Transportation": student.get_transportation(),
+                                 "Transport Others": student.get_transport_others(),
+                                 "Potential Drivers": student.get_other_drivers() if student.get_other_drivers() else '',
+                                 "Transportation Comments": student.get_transportation_comments(),
+                                 "Lab Comments": student.get_lab_comments()})
 
 
 def write_extra_students(students):
@@ -366,21 +381,22 @@ def main():
     teachers = make_teachers("Teacher Field Experiences Stage 1 and 2.csv")
     for student in stage_1_and_2_students:
         print()
-        print(student)
+        # print(student)
     for student in stage_3_students:
         print()
-        print(student)
+        # print(student)
 
     # print()
     for teacher in teachers:
-        print(teacher)
+        # print(teacher)
+        print()
 
     # print()
     matchmaker(stage_3_students, teachers) # all done for stage 3 students. Not tested well enough yet though
-    matchmaker(stage_1_and_2_students, teachers)
-    # matchmaker(stage_1_and_2_students, teachers, alternate_time=True)
+    matchmaker(stage_1_and_2_students, teachers) # all done for preferred time stage 1 and 2 students
+    matchmaker(stage_1_and_2_students, teachers, alternate_time=True) # all done
 
-    # write_schedule(teachers)
+    write_schedule(teachers)
     # write_extra_students(students)
 
 
