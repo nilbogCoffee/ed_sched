@@ -310,7 +310,6 @@ def matchmaker(students, teachers, alternate_time=False):
     Determines which students are matches with each teacher by each student object attribute
     This is the main function that this program is centered around
     """
-    stage_3_leftover = [] # do leftover
     students_need_ride = []
     for student in students:
         for teacher in teachers:
@@ -325,10 +324,11 @@ def matchmaker(students, teachers, alternate_time=False):
                         students_need_ride.append(student)
                     break
 
+    leftover = [student for student in students if not student.get_match_found()]
     
     assign_drivers(students_need_ride, students)
     print_sched(teacher for teacher in teachers if teacher.get_student())
-
+    write_unmatched_students(leftover)
 
 def assign_drivers(students_need_ride, all_students):
     """Students that need a ride are given a list of students that are available for car pool"""
@@ -337,6 +337,15 @@ def assign_drivers(students_need_ride, all_students):
            if any(time in driver.get_lab_times() for time in student.get_lab_times()) and driver.get_transport_others():
                print('one found')
                student.add_driver(driver)
+
+
+def format_grades(grades):
+    if -1 in grades:
+        grades[grades.index(-1)] = 'PK'
+    if 0 in grades:
+        grades[grades.index(0)] = 'K'
+
+    return grades
 
 
 def write_schedule(teachers):
@@ -355,7 +364,7 @@ def write_schedule(teachers):
                                  "District": teacher.get_school(),
                                  "Subject": teacher.get_certification().get_subject(),
                                  "Lab(s)": ', '.join(map(str, teacher.get_all_lab_times())),
-                                 "Grade": ', '.join(map(str, teacher.get_certification().get_grades())),
+                                 "Grade": ', '.join(map(str, format_grades(teacher.get_certification().get_grades()))),
                                  "Transportation": student.get_transportation(),
                                  "Transport Others": student.get_transport_others(),
                                  "Potential Drivers": student.get_other_drivers() if student.get_other_drivers() else '',
@@ -363,17 +372,22 @@ def write_schedule(teachers):
                                  "Lab Comments": student.get_lab_comments()})
 
 
-def write_extra_students(students):
+def write_unmatched_students(students):
     """Write the students that have no assigned field experience to a csv file"""
     with open("unmatched_students.csv", "w") as schedule:
-        writer = csv.DictWriter(schedule, fieldnames=["Student","Lab", "Can Drive"])
+        writer = csv.DictWriter(schedule, fieldnames=["Student Name", "Stage", "Transportation", "Certifications", "Labs", "Lab Comments"])
         writer.writeheader()
 
         for student in students:
-            if not student.get_match_found():
-                writer.writerow({"Student": student.get_name(), 
-                                 "Lab": ','.join(student.get_availability()), 
-                                 "Can Drive": 'Yes' if student.get_can_drive() else 'No'})
+            certifications = student.get_certifications()
+            for certification in certifications:
+                format_grades(certification.get_grades())
+            writer.writerow({"Student Name": student.get_name(), 
+                             "Stage": 'Stage 1 & 2' if isinstance(student, Stage1And2Student) else 'Stage 3',
+                             "Transportation": student.get_transportation(), 
+                             "Certifications": ', '.join(map(str, student.get_certifications())),
+                             "Labs": ', '.join(map(str, student.get_lab_times())),
+                             "Lab Comments": student.get_lab_comments()})
 
 
 def main():
@@ -394,7 +408,7 @@ def main():
     # print()
     matchmaker(stage_3_students, teachers) # all done for stage 3 students. Not tested well enough yet though
     matchmaker(stage_1_and_2_students, teachers) # all done for preferred time stage 1 and 2 students
-    matchmaker(stage_1_and_2_students, teachers, alternate_time=True) # all done
+    # matchmaker(stage_1_and_2_students, teachers, alternate_time=True) # all done
 
     write_schedule(teachers)
     # write_extra_students(students)

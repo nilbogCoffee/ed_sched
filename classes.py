@@ -25,14 +25,14 @@ class Student:
     def get_certifications(self):
         return self.certifications
 
-    # def set_certifications(self, certifications):
-    #     self.certifications = certifications
+    def set_certifications(self, certifications):
+        self.certifications = certifications
 
     # def get_certification_comments(self):
         # return self.certification_comments
 
-    def set_certification_comments(self, comment):
-        self.certification_comments = comment
+    # def set_certification_comments(self, comment):
+    #     self.certification_comments = comment
 
     def get_transportation(self):
         return self.transportation
@@ -165,8 +165,7 @@ class Certification:
         self.grades = grades 
 
     def __str__(self):
-        return (f'Subject: {self.get_subject()}\n'
-                f'Grades: {self.get_grades()}')
+        return f'Subject: {self.get_subject()} Grades: {self.get_grades()}'
 
            
 class LabTime:
