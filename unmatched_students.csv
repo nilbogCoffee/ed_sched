@@ -1,3 +1,1 @@
-Student Name,Stage,Transportation,Certifications,Labs,Lab Comments
-Mark1 Morykan1,Stage 1 & 2,True,"Subject: Art Education Grades: ['PK', 'K', 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12], Subject: Early Childhood Education Grades: ['PK', 'K', 1, 2, 3, 4]","Days: ['M', 'W'] Time: 9:00AM-11:00AM, Days: ['T', 'R'] Time: 1:00PM-3:00PM, Days: ['M', 'W'] Time: 9:15AM-11:15AM",
-Shane Houghton,Stage 1 & 2,True,"Subject: German Grades: ['PK', 'K', 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12]","Days: ['M', 'W'] Time: 9:15AM-11:15AM, Days: ['T', 'R'] Time: 8:00AM-10:00AM, Days: ['M', 'W'] Time: 8:00AM-10:00AM",
+Student Name,Stage,Transportation,Transport Others,Transportation Comments,Certifications,Labs,Lab Comments

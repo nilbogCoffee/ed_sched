@@ -165,7 +165,8 @@ class Certification:
         self.grades = grades 
 
     def __str__(self):
-        return f'Subject: {self.get_subject()} Grades: {self.get_grades()}'
+        grades = ', '.join(map(str, self.get_grades()))
+        return f'[Subject: {self.get_subject()}, Grades: {grades}]'
 
            
 class LabTime:
@@ -192,7 +193,8 @@ class LabTime:
         return self.days == other.days and self.time == other.time if isinstance(other, LabTime) else False
 
     def __str__(self):
-        return  f'Days: {self.get_days()} Time: {self.get_time()}'
+        days = ', '.join(self.get_days())
+        return  f'[Days: {days}, Time: {self.get_time()}]'
 
 
 class Teacher:
@@ -262,8 +264,8 @@ class Teacher:
         self.student = student
     
     def __str__(self):
-        stage2times = ', '.join(map(lambda lab_time: lab_time.__str__(), self.get_stage2_times()))
-        stage3times = ', '.join(map(lambda lab_time: lab_time.__str__(), self.get_stage3_times()))
+        stage2times = ', '.join(map(str, self.get_stage2_times()))
+        stage3times = ', '.join(map(str, self.get_stage3_times()))
         return (f'Email: {self.get_email()}\n'
                 f'Name: {self.get_name()}\n'
                 f'Certification: {self.get_certification()}\n'
