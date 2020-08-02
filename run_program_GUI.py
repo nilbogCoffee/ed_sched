@@ -2,7 +2,7 @@ import os
 import tkinter as tk
 import tkinter.ttk as ttk
 from tkinter import filedialog
-from ed_code2 import make_students, make_teachers, matchmaker, write_schedule, write_extra_students
+from ed_code2 import make_students, make_teachers, matchmaker, write_schedule, write_unmatched_students
 
 class run_GUI:
     """
@@ -17,12 +17,17 @@ class run_GUI:
         self.window = tk.Tk()
         self.window.title("Field Experience Scheduler")
         self.filenames = {}
-        self.confirmation_teacher_label = ''
-        self.confirmation_student_label = ''
+        self.confirmation_teacher_label = None
+        self.confirmation_student_label = None
+        self.create_schedule = None
+        self.error_label = None
 
 
     def check_run_button(self):
-        if len(self.filenames) == 2:
+        if self.error_label:
+            self.error_label.destroy()
+            self.error_label = None
+        if len(self.filenames) == 2 and not self.create_schedule:
             self.expose_run_button()
 
 
@@ -81,12 +86,13 @@ class run_GUI:
 
     def create_widgets(self):
         """Creates the first screen with the heading and button and begins the event handler"""
-        label = tk.Label(master=self.window, text="Choose both the student and teacher .csv files you wish to use for scheduling:").pack()
+        small_label_font = ("calibri", 15, "underline")
+        label = tk.Label(master=self.window, font=("calibri", "20", "bold"), text="Choose both the student and teacher .csv files you wish to use for scheduling:").pack()
 
-        student_label = tk.Label(master=self.window, text="Choose the student .csv file:").pack()
+        student_label = tk.Label(master=self.window, font=small_label_font, text="Choose the student .csv file:").pack()
         student_button = ttk.Button(master=self.window, text="Browse Files", command=self.choose_student_file).pack()
 
-        teacher_label = tk.Label(master=self.window, text="Choose the teacher .csv file:").pack()
+        teacher_label = tk.Label(master=self.window, font=small_label_font, text="Choose the teacher .csv file:").pack()
         teacher_button = ttk.Button(master=self.window, text="Browse Files", command=self.choose_teacher_file).pack()
         
         self.window.mainloop()
@@ -98,20 +104,44 @@ class run_GUI:
 
     def expose_run_button(self):
         """Creates the run button and links it to the run function which begins the scheduling from within the ed_code2.py file"""
-        ttk.Button(master=self.window, text="Create Schedule", command=lambda: run(self.get_filenames())).pack()
+        style = ttk.Style()
+        style.configure('K.TButton', foreground="green", font="helvetica 24 bold")
+        self.create_schedule = ttk.Button(master=self.window, text="Create Schedule", style="K.TButton", command=self.run)
+        self.create_schedule.pack()
 
 
-def run(filenames):
-    
-    # Try and except these files
-    try:
-        students = make_students(filenames['Student'])
-        teachers = make_teachers(filenames['Teacher'])
-    except:
-        pass
-    
-    matchmaker(students, teachers)
+    def run(self):
+        try:
+            stage_1_and_2_students, stage_3_students = make_students(self.get_filenames()['Student'])
+            teachers = make_teachers(self.get_filenames()['Teacher'])
+            if self.error_label:
+                self.error_label.destroy()
+        except:
+            if not self.error_label:
+                self.error_label = tk.Label(master=self.window, font=("calibri", 25, "bold underline"), fg="red", text="Cannot read files! Make sure to download csv files directly from the generated Google Sheet.")
+                self.error_label.pack()
+            return
 
-    write_schedule(teachers)
-    write_extra_students(students)
+        for student in stage_1_and_2_students:
+            print()
+            # print(student)
+        for student in stage_3_students:
+            print()
+            # print(student)
 
+        # print()
+        for teacher in teachers:
+            # print(teacher)
+            print()
+
+        stage_3_leftover = matchmaker(stage_3_students, teachers) # all done for stage 3 students. Not tested well enough yet though
+        matchmaker(stage_1_and_2_students, teachers) # all done for preferred time stage 1 and 2 students
+        stage_1_and_2_leftover = matchmaker(stage_1_and_2_students, teachers, alternate_time=True) # all done
+
+        write_schedule(teachers)
+        write_unmatched_students(stage_3_leftover + stage_1_and_2_leftover)
+
+        self.window.destroy()
+
+# if __name__ == '__main__':
+#     run('')

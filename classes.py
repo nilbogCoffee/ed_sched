@@ -2,7 +2,6 @@ class Student:
     """
     Student parent class
     """
-
     def __init__(self, email: str, name: str, certifications: list, transportation: bool, transport_others: bool, past_schools: list,
                  transportation_comments: str, lab_comments: str):
         self.email = email
@@ -125,7 +124,7 @@ class Stage1And2Student(Student):
         self.alt_lab_times = times
 
     def __str__(self):
-        alt_lab_times = ', '.join(map(lambda lab_time: lab_time.__str__(), self.get_alt_lab_times()))
+        alt_lab_times = ', '.join(map(str, self.get_alt_lab_times()))
         return super().__str__() + (f'\nPreferred Lab Time: {self.get_preferred_lab_time()}'
                                     f'\nAlternate Lab Times: {alt_lab_times}')
 
@@ -140,7 +139,7 @@ class Stage3Student(Student):
         self.lab_times = lab_times
 
     def __str__(self):
-        lab_times = ', '.join(map(lambda time: time.__str__(), self.get_lab_times()))
+        lab_times = ', '.join(map(str, self.get_lab_times()))
         return super().__str__() + f'\nLab Times: {lab_times}'
 
 
