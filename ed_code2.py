@@ -1,16 +1,22 @@
 import csv
 from classes import Teacher, Certification, LabTime, Stage1And2Student, Stage3Student
 
-def create_student_certifications(certification, other=None): #There are semi-colons in the csv from forms
+def create_student_certifications(certification, other): #There are semi-colons in the csv file downloaded from Google forms
     """
     Create certification objects from a list of certifications from a student using their certified grades and subjects
+    :param certification: A string where each subject-grade pair is delimited by a comma
+    :param other: A string representing the student's other option
+    :returns: A list of Certification objects and other options if other was specified
     """
     return [create_student_certification(cert, other) for cert in certification.split(', ')]
 
 
 def create_student_certification(certification, other):
     """
-    Creates one certification object from subject and grade
+    Creates one certification object from subject and grade or returns other options if specified
+    :param certification: A string representing a single subject-grade pair used to create a Certification object
+    :param other: A string representing the student's other option which cannot be used to create a Certification object
+    :returns: A Certification object unless other option is specified, then return other
     """
     def get_subject():
         return certification[certification.rfind(':') + 2:]
@@ -25,9 +31,12 @@ def create_student_certification(certification, other):
     return Certification(subject=get_subject(), grades=get_grades()) if certification != 'Other' else other
 
 
-def create_times(times, other=None):
+def create_times(times, other):
     """
-    Create lab time objects based on the day and time of the list of labs from a student
+    Create LabTime objects based on the day and time of the list of labs from a student
+    :param times: A string where each day-time pair is delimited by a comma
+    :param other: A string representing the student's other option
+    :returns: A list of LabTime objects and other options if other is specified
     """
     return [create_time(time, other) for time in times.split(', ') if times]
 
@@ -35,6 +44,9 @@ def create_times(times, other=None):
 def create_time(time, other):
     """
     Create a single LabTime object based on the day and time of the lab
+    :param time: A string representing a single day-time pair used to create a LabTime object
+    :param other: A string representing the student's other option which cannot be used to create a LabTime object
+    :returns: A new LabTime object unless other was specified, then return other
     """
     end_index = time.rfind(' ')
     def get_days():
@@ -47,16 +59,21 @@ def create_time(time, other):
     return LabTime(days=get_days(), time=get_time()) if time != 'Other' else other
 
 
-def convert_grade(grade): #not gonna stay, serves its purpose for now
+def convert_grade(grade):
     # grade.isspace() returns if grade is all whitespaces
+    """
+    Converts the teacher's grade
+    :param grade: A string of the grade the teacher teaches
+    :returns: A list of the new grades
+    """
     if grade[:2] == 'PK':
         grade = [-1]
     elif grade == 'Kindergarten':
         grade = [0]
-    elif len(grade) > 1 and grade[:2].isdigit():
+    elif grade[:2].isdigit():
         grade = [int(grade[:2])]
-    elif grade[0].isdigit():
-        grade = [int(grade[0])]
+    elif grade[:1].isdigit():
+        grade = [int(grade[:1])]
     elif grade.startswith('Special'):
         grade = list(range(-1, 13))
     else:
@@ -64,24 +81,27 @@ def convert_grade(grade): #not gonna stay, serves its purpose for now
     
     return grade
 
+
 def make_students(file_name):
     """
-    Create all student objects from the file
+    Create all student objects from the Student csv file
+    :param file_name: The student file to extract data from using the csv module's DictReader
+    :returns: A two element tuple of Stage1And2Student objects and Stage3Student objects
     """
     stage_1_and_2_students = []
     stage_3_students = []
     students = csv.DictReader(open(file_name, encoding='utf-8-sig'))   # Need encoding field to delete the Byte Order Mark (BOM)
     for student in students:
         # Just need to check to make sure no whitespace fields maybe (var.isspace())
-        email = student['Email Address']
-        first_name = student['First Name']
-        last_name = student['Last Name']
+        email = student['Email Address'].strip()
+        first_name = student['First Name'].strip()
+        last_name = student['Last Name'].strip()
         stage = student['Stage']
         certification = student['Certification(s)']
-        other_certification = student['If Other, indicate certification']
+        other_certification = student['If Other, indicate certification'].strip()
         transportation = student['Transportation']
         transport_others = student['Transport Others']
-        transportation_comments = student['Transportation Comments']
+        transportation_comments = student['Transportation Comments'].strip()
         past_schools = [student['District Code 1'],
                         student['District Code 2'],
                         student['District Code 3'],
@@ -91,9 +111,9 @@ def make_students(file_name):
         if stage == 'Stage 1 & 2':
             preferred_time = student['Preferred Time']
             alternate_times = student['Alternate Time']
-            other_preferred_time = student['If Other, indicate preferred lab time']
-            other_alternate_times = student['If Other, indicate alternate lab time']
-            lab_comments = student['Stage 1&2 Comments']
+            other_preferred_time = student['If Other, indicate preferred lab time'].strip()
+            other_alternate_times = student['If Other, indicate alternate lab time'].strip()
+            lab_comments = student['Stage 1&2 Lab Comments'].strip()
 
             new_student = Stage1And2Student(email=email,
                                             name=first_name + ' ' + last_name,
@@ -109,14 +129,14 @@ def make_students(file_name):
 
         elif stage == 'Stage 3':
             time_260 = student['260 Time']
-            other_time_260 = student['If Other, indicate EDUC 260 lab time']
+            other_time_260 = student['If Other, indicate EDUC 260 lab time'].strip()
             time_360 = student['360-366 Time']
-            other_time_360 = student['If Other, indicate EDUC 360-366 lab time']
+            other_time_360 = student['If Other, indicate EDUC 360-366 lab time'].strip()
             time_368 = student['368 Time'] 
-            other_time_368 = student['If Other, indicate EDUC 368 lab time']
+            other_time_368 = student['If Other, indicate EDUC 368 lab time'].strip()
             time_3582 = student['358.2 Time']
-            other_time_3582 = student['If Other, indicate EDUC 358.2 lab time']
-            lab_comments = student['Stage 3 Lab Comments']
+            other_time_3582 = student['If Other, indicate EDUC 358.2 lab time'].strip()
+            lab_comments = student['Stage 3 Lab Comments'].strip()
 
             lab_times = create_times(time_260, other_time_260) + create_times(time_360, other_time_360) + \
                         create_times(time_368, other_time_368) + create_times(time_3582, other_time_3582)
@@ -138,21 +158,22 @@ def make_students(file_name):
 
 def make_teachers(file_name):
     """
-    Create all teacher objects from the Tidy_Ed_Data_Students.csv file
+    Create all teacher objects from the Teacher csv file
+    :param file_name: The file to extract data from using the csv module's DictReader
+    :returns: A list of Teacher objects
     """
     teacher_list = []
     teachers = csv.DictReader(open(file_name, encoding='utf-8-sig'))   # Need encoding field to delete the Byte Order Mark (BOM)
     for teacher in teachers:
-        # Just need to check to make sure no whitespace fields
-        email = teacher['Email Address']
-        name = teacher['Teacher\'s Full Name']
+        email = teacher['Email Address'].strip()
+        name = teacher['Teacher\'s Full Name'].strip()
         school = teacher['District/Entity']
         subject = teacher['Subject']
         grade = teacher['Grade']
         stage_3_times = teacher['Stage 3 Lab']
-        other_stage_3_times = teacher['If Other, indicate Stage 3 lab time']
+        other_stage_3_times = teacher['If Other, indicate Stage 3 lab time'].strip()
         stage_1_and_2_times = teacher['Stage 1 & 2 Lab']
-        other_stage_1_and_2_times = teacher['If Other, indicate Stage 1 & 2 lab time']
+        other_stage_1_and_2_times = teacher['If Other, indicate Stage 1 & 2 lab time'].strip()
 
         new_teacher = Teacher(email=email,
                               name=name,
@@ -169,6 +190,9 @@ def make_teachers(file_name):
 def check_certification(student, teacher):
     """
     Check if teacher grade and subject are in one of the student's certifications
+    :param student: The Student object
+    :param teacher: The Teacher object
+    :returns: Boolean value
     """
     student_certifications = student.get_certifications()
     teacher_certification = teacher.get_certification()
@@ -195,6 +219,9 @@ def check_stage_1_and_2_preferred(student, teacher):
     """
     Only used for stage 1 and 2 students for preferred times.
     This function will be used after stage 3 students are handled
+    :param student: The Student object
+    :param teacher: The Teacher object
+    :returns: A single element list of the student preferred time if that time is in teacher times, otherwise empty string
     """
     # return student.get_preferred_lab_time() in teacher.get_stage2_times()
     return [student.get_preferred_lab_time()] if student.get_preferred_lab_time() in teacher.get_stage2_times() else ''
@@ -203,6 +230,9 @@ def check_stage_1_and_2_alternate(student, teacher):
     """
     Only used for stage 1 and 2 students for there alternate times
     This function is used after preferred times are handled for all students
+    :param student: The Student object
+    :param teacher: The Teacher object
+    :eturns: A list of all student alternate times that are in the teacher times
     """
     # student_times = student.get_alternate_times()
     # teacher_times = teacher.get_stage2_times()
@@ -219,9 +249,12 @@ def check_stage_3_times(student, teacher):
     """
     Only used for stage 3 students for there lab times
     This function is used first before stage 1 & 2 students are considered
+    :param student: The Student object
+    :param teacher: The Teacher object
+    :returns: A list of all student times that are in the teacher times
     """
-    student_times = student.get_lab_times()
-    teacher_times = teacher.get_stage3_times()
+    # student_times = student.get_lab_times()
+    # teacher_times = teacher.get_stage3_times()
     # print(student_times)
     # print(teacher_times[1])
     # for time in student_times:
@@ -232,21 +265,36 @@ def check_stage_3_times(student, teacher):
     # return False
     # return any(time in teacher.get_stage3_times() for time in student.get_lab_times())
     # Use filter to return time if needed
+    # Can also use list comp
     return list(filter(lambda time: time in teacher.get_stage3_times(), student.get_lab_times()))
 
 
 def check_school(student, teacher):
-    """Check that the teacher's school is not in the students list of previous schools"""
+    """
+    Check that the teacher's school is not in the students list of previous schools
+    :param student: The Student object
+    :param teacher: The Teacher object
+    :returns: Boolean result
+    """
     return teacher.get_school() in student.get_past_schools()
 
 
 def check_transport(student, teacher):
-    """Check that the student can drive or walk"""
+    """
+    Check that the student can commute
+    :param student: The Student object
+    :param teacher: The Teacher object
+    :returns: boolean result
+    """
     return student.get_transportation()
 
 
 def print_sched(teachers):
-    """Print the schedule results"""
+    """
+    Print the schedule results
+    Used for debugging
+    :param teachers: A list of Teacher objects 
+    """
     for teacher in teachers:
         student = teacher.get_student()
         student_name = student.get_name()
@@ -266,7 +314,10 @@ def print_sched(teachers):
 def perform_checks(student, teacher, alternate_time):
     """
     Perform all checks between student and teacher to see if they are compatible
-    Returns a tuple of whether the match is found and whether the student can commute
+    :param student: The Student object
+    :param teacher: The Teacher object
+    :param alternate_time: A boolean value specifying whether or not to use the student's alternate times
+    :returns: A four element tuple of all checks
     """
     certification = check_certification(student, teacher)
     print(certification)
@@ -290,7 +341,12 @@ def perform_checks(student, teacher, alternate_time):
 
 
 def match_found(student, teacher, lab_times):
-    """Match found between student and teacher. Sets the teacher's student. Overwrites the student's and teachers' lab times"""
+    """
+    Match found between student and teacher. Sets the teacher's student. Overwrites the student's and teachers' lab times
+    :param student: The Student object
+    :param teacher: The Teacher object
+    :param lab_times: The list of lab_times that are the same between student and teacher
+    """
     student.set_match_found(True)
     teacher.set_match_found(True)
     teacher.set_student(student)
@@ -308,7 +364,13 @@ def match_found(student, teacher, lab_times):
 def matchmaker(students, teachers, alternate_time=False):
     """
     Determines which students are matches with each teacher by each student object attribute
+    Assigns drivers to students that cannot commute
+    Prints the schedule results
     This is the main function that this program is centered around
+    :param students: A list of student objects
+    :param teachers: A list of teacher objects
+    :param alternate_time: A boolean value specifying whether or not to use the student's alternate times
+    :returns: A list of students that have no matched teacher
     """
     students_need_ride = []
     for student in students:
@@ -333,7 +395,11 @@ def matchmaker(students, teachers, alternate_time=False):
 
 
 def assign_drivers(students_need_ride, all_students):
-    """Students that need a ride are given a list of students that are available for car pool"""
+    """
+    Students that need a ride are given a list of students that are available for car pool
+    :param students_need_ride: A list of students that cannot commute
+    :param all_students: A list of all students
+    """
     for student in students_need_ride:
        for driver in all_students:
            if any(time in driver.get_lab_times() for time in student.get_lab_times()) and driver.get_transport_others():
@@ -342,6 +408,11 @@ def assign_drivers(students_need_ride, all_students):
 
 
 def format_grades(grades):
+    """
+    Change the -1 and 0 grade values back to 'PK' and 'K'
+    :param grades: A list of integer values
+    :returns: A new list of grades
+    """
     if -1 in grades:
         grades[grades.index(-1)] = 'PK'
     if 0 in grades:
@@ -351,7 +422,10 @@ def format_grades(grades):
 
 
 def write_schedule(teachers):
-    """Write results to csv file"""
+    """
+    Write results to csv file
+    :param teachers: A list of Teacher objects
+    """
     with open("sched.csv", "w") as schedule:
         writer = csv.DictWriter(schedule, fieldnames=["Student Name", "Teacher Name", "District", "Subject", "Lab(s)", 
                                                       "Grade", "Transportation", "Transport Others", "Potential Drivers",
@@ -375,7 +449,10 @@ def write_schedule(teachers):
 
 
 def write_unmatched_students(students):
-    """Write the students that have no assigned field experience to a csv file"""
+    """
+    Write the students that have no assigned field experience to a csv file
+    :param students: A list of Student objects
+    """
     with open("unmatched_students.csv", "w") as schedule:
         writer = csv.DictWriter(schedule, fieldnames=["Student Name", "Stage", "Transportation", "Transport Others",
                                                       "Transportation Comments", "Certifications", "Labs", "Lab Comments"])
@@ -395,7 +472,7 @@ def write_unmatched_students(students):
 
 
 def main():
-    stage_1_and_2_students, stage_3_students = make_students("Student Field Experiences Stage 1 and 2.csv")
+    stage_1_and_2_students, stage_3_students = make_students("All Student Field Experiences.csv")
     teachers = make_teachers("Teacher Field Experiences Stage 1 and 2.csv")
     for student in stage_1_and_2_students:
         print()
