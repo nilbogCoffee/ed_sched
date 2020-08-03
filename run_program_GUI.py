@@ -36,10 +36,10 @@ class run_GUI:
         self.add_file(filename, 'Student')
         filename = self.parse_filename(filename)
         if self.confirmation_student_label:
-            self.confirmation_student_label.destroy()
-
-        self.confirmation_student_label = tk.Label(master=self.window, text=f"Student file: {filename}")
-        self.confirmation_student_label.pack()
+            self.confirmation_student_label.configure(text=f"Student file: {filename}")
+        else:
+            self.confirmation_student_label = tk.Label(master=self.window, font=('calibri', 18), text=f"Student file: {filename}")
+            self.confirmation_student_label.pack()
         self.check_run_button()
 
     
@@ -47,10 +47,10 @@ class run_GUI:
         self.add_file(filename, 'Teacher')
         filename = self.parse_filename(filename)
         if self.confirmation_teacher_label:
-            self.confirmation_teacher_label.destroy()
-
-        self.confirmation_teacher_label = tk.Label(master=self.window, text=f"Teacher file: {filename}")
-        self.confirmation_teacher_label.pack()
+            self.confirmation_teacher_label.configure(text=f"Teacher file: {filename}")
+        else:
+            self.confirmation_teacher_label = tk.Label(master=self.window, font=('calibri', 18), text=f"Teacher file: {filename}")
+            self.confirmation_teacher_label.pack()
         self.check_run_button()
 
 
@@ -106,6 +106,7 @@ class run_GUI:
         """Creates the run button and links it to the run function which begins the scheduling from within the ed_code2.py file"""
         style = ttk.Style()
         style.configure('K.TButton', foreground="green", font="helvetica 24 bold")
+        print('create the schedule')
         self.create_schedule = ttk.Button(master=self.window, text="Create Schedule", style="K.TButton", command=self.run)
         self.create_schedule.pack()
 
