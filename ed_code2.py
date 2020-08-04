@@ -498,9 +498,3 @@ def main():
 if __name__ == '__main__':
     main()
 
-
-"""
-TODO: 
-1. Write bash script to actually run the program so that a user can execute program on double click of the bash script
-2. Make GUI visually appealing and check for user error
-"""

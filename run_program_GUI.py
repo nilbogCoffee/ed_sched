@@ -1,4 +1,5 @@
 import os
+import subprocess
 import tkinter as tk
 import tkinter.ttk as ttk
 from tkinter import filedialog
@@ -7,8 +8,7 @@ from ed_code2 import make_students, make_teachers, matchmaker, write_schedule, w
 class run_GUI:
     """
     This class is used to run the GUI for this program.
-    First, it asks for 2 files that the user can choose from their Finder Menu after hitting the Browse button
-    It validates to make sure that only two files are being used. The user may enter them one at a time as well.
+    First, it asks for 2 files that the user can choose from their Finder Menu after hitting the Browse buttons
     Then, it lists the filenames without their full paths that the user has provided.
     Lastly, it exposes the run button to run the scheduler
     """
@@ -111,6 +111,31 @@ class run_GUI:
         self.create_schedule.pack()
 
 
+    def display_open_message(self):
+        open_file_label = tk.Label(master=self.window, text="Open csv files?")
+        open_file_label.pack()
+
+        top = tk.Frame(self.window)
+        bottom = tk.Frame(self.window)
+        top.pack(side=tk.TOP)
+        bottom.pack(side=tk.BOTTOM, fill=tk.BOTH, expand=True)
+
+        yes_button = ttk.Button(master=self.window, text="Open", command=self.open_files)
+        no_button = ttk.Button(master=self.window, text="No", command=lambda: self.window.destroy())
+
+        yes_button.pack(in_=top, side=tk.LEFT)
+        no_button.pack(in_=top, side=tk.LEFT)
+
+
+    def open_files(self):
+        try:
+            subprocess.run(['open', 'unmatched_students.csv', 'sched.csv', '-a', 'Microsoft Excel'], check=True)
+        except:
+            subprocess.run(['open', 'unmatched_students.csv', 'sched.csv'], check=True)
+
+        self.window.destroy()
+
+        
     def run(self):
         try:
             stage_1_and_2_students, stage_3_students = make_students(self.get_filenames()['Student'])
@@ -142,7 +167,8 @@ class run_GUI:
         write_schedule(teachers)
         write_unmatched_students(stage_3_leftover + stage_1_and_2_leftover)
 
-        self.window.destroy()
+        self.display_open_message()
+        # self.window.destroy() # Fix exit stuff
 
 # if __name__ == '__main__':
 #     run('')
