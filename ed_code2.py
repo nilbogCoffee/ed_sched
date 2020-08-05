@@ -1,4 +1,6 @@
 import csv
+import shutil
+import os
 from classes import Teacher, Certification, LabTime, Stage1And2Student, Stage3Student
 
 def create_student_certifications(certification, other): #There are semi-colons in the csv file downloaded from Google forms
@@ -447,6 +449,8 @@ def write_schedule(teachers):
                                  "Transportation Comments": student.get_transportation_comments(),
                                  "Lab Comments": student.get_lab_comments()})
 
+    shutil.move('sched.csv', os.path.expanduser('~')+'/Downloads/sched.csv')
+
 
 def write_unmatched_students(students):
     """
@@ -470,31 +474,32 @@ def write_unmatched_students(students):
                              "Labs": ', '.join(map(str, student.get_lab_times())),
                              "Lab Comments": student.get_lab_comments()})
 
+    shutil.move('unmatched_students.csv', os.path.expanduser('~')+'/Downloads/unmatched_students.csv')
 
-def main():
-    stage_1_and_2_students, stage_3_students = make_students("All Student Field Experiences.csv")
-    teachers = make_teachers("Teacher Field Experiences Stage 1 and 2.csv")
-    for student in stage_1_and_2_students:
-        print()
-        # print(student)
-    for student in stage_3_students:
-        print()
-        # print(student)
+# def main():
+#     stage_1_and_2_students, stage_3_students = make_students("All Student Field Experiences.csv")
+#     teachers = make_teachers("Teacher Field Experiences Stage 1 and 2.csv")
+#     for student in stage_1_and_2_students:
+#         print()
+#         # print(student)
+#     for student in stage_3_students:
+#         print()
+#         # print(student)
 
-    # print()
-    for teacher in teachers:
-        # print(teacher)
-        print()
+#     # print()
+#     for teacher in teachers:
+#         # print(teacher)
+#         print()
 
-    # print()
-    stage_3_leftover = matchmaker(stage_3_students, teachers) # all done for stage 3 students. Not tested well enough yet though
-    matchmaker(stage_1_and_2_students, teachers) # all done for preferred time stage 1 and 2 students
-    stage_1_and_2_leftover = matchmaker(stage_1_and_2_students, teachers, alternate_time=True) # all done
+#     # print()
+#     stage_3_leftover = matchmaker(stage_3_students, teachers) # all done for stage 3 students. Not tested well enough yet though
+#     matchmaker(stage_1_and_2_students, teachers) # all done for preferred time stage 1 and 2 students
+#     stage_1_and_2_leftover = matchmaker(stage_1_and_2_students, teachers, alternate_time=True) # all done
 
-    write_schedule(teachers)
-    write_unmatched_students(stage_3_leftover + stage_1_and_2_leftover)
+#     write_schedule(teachers)
+#     write_unmatched_students(stage_3_leftover + stage_1_and_2_leftover)
 
 
-if __name__ == '__main__':
-    main()
+# if __name__ == '__main__':
+#     main()
 

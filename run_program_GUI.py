@@ -17,9 +17,11 @@ class run_GUI:
         self.window = tk.Tk()
         self.window.title("Field Experience Scheduler")
         self.filenames = {}
+        self.downloads_folder = os.path.expanduser('~')+'/Downloads'
         self.confirmation_teacher_label = None
         self.confirmation_student_label = None
         self.create_schedule = None
+        self.open_file_label = None
         self.error_label = None
 
 
@@ -112,8 +114,8 @@ class run_GUI:
 
 
     def display_open_message(self):
-        open_file_label = tk.Label(master=self.window, text="Open csv files?")
-        open_file_label.pack()
+        self.open_file_label = tk.Label(master=self.window, text="Open csv files?")
+        self.open_file_label.pack()
 
         top = tk.Frame(self.window)
         bottom = tk.Frame(self.window)
@@ -129,13 +131,13 @@ class run_GUI:
 
     def open_files(self):
         try:
-            subprocess.run(['open', 'unmatched_students.csv', 'sched.csv', '-a', 'Microsoft Excel'], check=True)
+            subprocess.run(['open', self.downloads_folder+'/unmatched_students.csv', self.downloads_folder+'/sched.csv', '-a', 'Microsoft Excel'], check=True)
         except:
-            subprocess.run(['open', 'unmatched_students.csv', 'sched.csv'], check=True)
+            subprocess.run(['open', self.downloads_folder+'/unmatched_students.csv', self.downloads_folder+'/sched.csv'], check=True)
 
         self.window.destroy()
 
-        
+
     def run(self):
         try:
             stage_1_and_2_students, stage_3_students = make_students(self.get_filenames()['Student'])
@@ -167,8 +169,8 @@ class run_GUI:
         write_schedule(teachers)
         write_unmatched_students(stage_3_leftover + stage_1_and_2_leftover)
 
-        self.display_open_message()
-        # self.window.destroy() # Fix exit stuff
+        if not self.open_file_label:
+            self.display_open_message()
 
 # if __name__ == '__main__':
 #     run('')
