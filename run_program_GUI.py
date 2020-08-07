@@ -3,7 +3,8 @@ import subprocess
 import tkinter as tk
 import tkinter.ttk as ttk
 from tkinter import filedialog
-# from classes import Student, Stage1And2Student, Stage3Student
+from openpyxl import Workbook
+import csv
 from ed_code2 import make_students, make_teachers, matchmaker, write_schedule, write_unmatched_students, assign_drivers
 
 class run_GUI:
@@ -109,7 +110,6 @@ class run_GUI:
         """Creates the run button and links it to the run function which begins the scheduling from within the ed_code2.py file"""
         style = ttk.Style()
         style.configure('K.TButton', foreground="green", font="helvetica 24 bold")
-        print('create the schedule')
         self.create_schedule = ttk.Button(master=self.window, text="Create Schedule", style="K.TButton", command=self.run)
         self.create_schedule.pack()
 
@@ -123,18 +123,43 @@ class run_GUI:
         top.pack(side=tk.TOP)
         bottom.pack(side=tk.BOTTOM, fill=tk.BOTH, expand=True)
 
-        yes_button = ttk.Button(master=self.window, text="Open", command=self.open_files)
+        yes_button = ttk.Button(master=self.window, text="Open in Excel", command=lambda: self.open_files('Microsoft Excel'))
+        num_button = ttk.Button(master=self.window, text="Open in Numbers", command=lambda: self.open_files('Numbers'))
         no_button = ttk.Button(master=self.window, text="No", command=lambda: self.window.destroy())
 
         yes_button.pack(in_=top, side=tk.LEFT)
+        num_button.pack(in_=top, side=tk.LEFT)
         no_button.pack(in_=top, side=tk.LEFT)
 
 
-    def open_files(self):
+    def open_files(self, app):
+        workbook = Workbook()
+        schedule_file = 'sched.csv'
+        unmatched_file = 'unmatched_students.csv'
+        schedule_sheet = workbook.active
+        unmatched_students_sheet = workbook.create_sheet()
+
+        schedule_sheet.title = "Schedule"
+        unmatched_students_sheet.title = "Unmatched Students"
+
+        with open(schedule_file) as csv_file:
+            for row in csv.reader(csv_file):
+                schedule_sheet.append(row)
+
+        with open(unmatched_file) as csv_file:
+            for row in csv.reader(csv_file):
+                unmatched_students_sheet.append(row)
+
+        workbook.save(self.downloads_folder + '/Schedule.xlsx')
+
         try:
-            subprocess.run(['open', self.downloads_folder+'/unmatched_students.csv', self.downloads_folder+'/sched.csv', '-a', 'Microsoft Excel'], check=True)
+            # subprocess.run(['open', self.downloads_folder+'/unmatched_students.csv', self.downloads_folder+'/sched.csv', '-a', 'Microsoft Excel'], check=True)
+            subprocess.run(['open', self.downloads_folder + '/Schedule.xlsx', '-a', app], check=True)
         except:
-            subprocess.run(['open', self.downloads_folder+'/unmatched_students.csv', self.downloads_folder+'/sched.csv'], check=True)
+            try:
+                subprocess.run(['open', self.downloads_folder + '/Schedule.xlsx'], check=True)
+            except:
+                subprocess.run(['open', self.downloads_folder+'/unmatched_students.csv', self.downloads_folder+'/sched.csv'], check=True)
 
         self.window.destroy()
 

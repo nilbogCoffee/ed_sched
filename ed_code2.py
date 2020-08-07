@@ -414,7 +414,7 @@ def write_schedule(teachers):
     Write results to csv file
     :param teachers: A list of Teacher objects
     """
-    with open("sched.csv", "w") as schedule:
+    with open("sched.csv", "w") as schedule:    # need to use the openpyxl here as well
         writer = csv.DictWriter(schedule, fieldnames=["Student Name", "Teacher Name", "Stage", "District", "Subject", 
                                                       "Optimal Lab Time", "All Possible Lab Times", 
                                                       "Grade", "Transportation", "Transport Others", "Potential Drivers",
@@ -441,7 +441,7 @@ def write_schedule(teachers):
                                  "Lab Comments": student.get_lab_comments()
                                  })
 
-    shutil.move('sched.csv', os.path.expanduser('~')+'/Downloads/sched.csv')
+    # shutil.move('sched.csv', os.path.expanduser('~')+'/Downloads/sched.csv')
 
 
 def write_unmatched_students(students):
@@ -466,7 +466,7 @@ def write_unmatched_students(students):
                              "Labs": ', '.join(map(str, student.get_lab_times())),
                              "Lab Comments": student.get_lab_comments()})
 
-    shutil.move('unmatched_students.csv', os.path.expanduser('~')+'/Downloads/unmatched_students.csv')
+    # shutil.move('unmatched_students.csv', os.path.expanduser('~')+'/Downloads/unmatched_students.csv')
 
 
 # def main():

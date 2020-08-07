@@ -8,7 +8,8 @@ py2applet --make-setup application.py
 
 Then modify APP variable in setup.py to be "application.py".
 And add the 'iconfile' key to the OPTIONS dict with the value of the .icns icon file.
-May need to add a 'packages' key to the OPTIONS dict as well with a list of packages that aren't part of the Python standard library
+May need to add a 'packages' key to the OPTIONS dict as well with a list of packages that aren't part of the Python standard library.
+Probably add 'packages' key to the OPTIONS dict with 'openpyxl' in the value list.
 
 Lastly, run:
 python3 setup.py py2app
