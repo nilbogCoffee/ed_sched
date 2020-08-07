@@ -1,6 +1,5 @@
 import csv
-import shutil
-import os
+from openpyxl import Workbook
 from classes import Teacher, Certification, LabTime, Stage1And2Student, Stage3Student, Student
 
 def create_student_certifications(certification, other): #There are semi-colons in the csv file downloaded from Google forms
@@ -409,65 +408,71 @@ def format_grades(grades):
     return grades 
 
 
-def write_schedule(teachers):
+def write_schedule(teachers, workbook):
     """
     Write results to csv file
     :param teachers: A list of Teacher objects
     """
-    with open("sched.csv", "w") as schedule:    # need to use the openpyxl here as well
-        writer = csv.DictWriter(schedule, fieldnames=["Student Name", "Teacher Name", "Stage", "District", "Subject", 
-                                                      "Optimal Lab Time", "All Possible Lab Times", 
-                                                      "Grade", "Transportation", "Transport Others", "Potential Drivers",
-                                                      "Transportation Comments", "Lab Comments"])
-        writer.writeheader()
+    schedule_sheet = workbook["Schedule"]
+    headers = ["Student Name", "Teacher Name", "Stage", "District", "Subject", 
+               "Optimal Lab Time", "All Possible Lab Times", 
+               "Grade", "Transportation", "Transport Others", "Potential Drivers",
+               "Transportation Comments", "Lab Comments"]
+    schedule_sheet.append(headers)
 
-        for teacher in teachers:
-            if teacher.get_match_found():                
-                student = teacher.get_student()
-                lab_times = teacher.get_all_lab_times()
-                optimal = str(lab_times[0]) if isinstance(student, Stage1And2Student) and student.get_preferred_lab_time() == lab_times[0] else ''
-                writer.writerow({"Student Name": student.get_name(), 
-                                 "Teacher Name": teacher.get_name(),
-                                 "Stage": 'Stage 1 & 2' if isinstance(student, Stage1And2Student) else 'Stage 3',
-                                 "District": teacher.get_school(),
-                                 "Subject": teacher.get_certification().get_subject(),
-                                 "Optimal Lab Time": optimal,
-                                 "All Possible Lab Times": ', '.join(map(str, lab_times)),
-                                 "Grade": ', '.join(map(str, format_grades(teacher.get_certification().get_grades()))),
-                                 "Transportation": 'Yes' if student.get_transportation() else 'No',
-                                 "Transport Others": 'Yes' if student.get_transport_others() else 'No',
-                                 "Potential Drivers": ', '.join(map(Student.get_name, student.get_other_drivers())) if student.get_other_drivers() else '',
-                                 "Transportation Comments": student.get_transportation_comments(),
-                                 "Lab Comments": student.get_lab_comments()
-                                 })
-
-    # shutil.move('sched.csv', os.path.expanduser('~')+'/Downloads/sched.csv')
+    for teacher in teachers:
+        if teacher.get_match_found():                
+            student = teacher.get_student()
+            lab_times = teacher.get_all_lab_times()
+            optimal = str(lab_times[0]) if isinstance(student, Stage1And2Student) and student.get_preferred_lab_time() == lab_times[0] else ''
+            schedule_sheet.append([student.get_name(),
+                                   teacher.get_name(),
+                                   'Stage 1 & 2' if isinstance(student, Stage1And2Student) else 'Stage 3',
+                                   teacher.get_school(),
+                                   teacher.get_certification().get_subject(),
+                                   optimal,
+                                   ', '.join(map(str, lab_times)),
+                                   ', '.join(map(str, format_grades(teacher.get_certification().get_grades()))),
+                                   'Yes' if student.get_transportation() else 'No',
+                                   'Yes' if student.get_transport_others() else 'No',
+                                   ', '.join(map(Student.get_name, student.get_other_drivers())) if student.get_other_drivers() else '',
+                                   student.get_transportation_comments(),
+                                   student.get_lab_comments()
+                                   ])
 
 
-def write_unmatched_students(students):
+def write_unmatched_students(students, workbook):
     """
     Write the students that have no assigned field experience to a csv file
     :param students: A list of Student objects
     """
-    with open("unmatched_students.csv", "w") as schedule:
-        writer = csv.DictWriter(schedule, fieldnames=["Student Name", "Stage", "Transportation", "Transport Others",
-                                                      "Transportation Comments", "Certifications", "Labs", "Lab Comments"])
-        writer.writeheader()
-        print(students)
-        for student in students:
-            for certification in student.get_certifications():
-                format_grades(certification.get_grades())
-            writer.writerow({"Student Name": student.get_name(), 
-                             "Stage": 'Stage 1 & 2' if isinstance(student, Stage1And2Student) else 'Stage 3',
-                             "Transportation": 'Yes' if student.get_transportation() else 'No',
-                             "Transport Others": 'Yes' if student.get_transport_others() else 'No',
-                             "Transportation Comments": student.get_transportation_comments(),
-                             "Certifications": ', '.join(map(str, student.get_certifications())),
-                             "Labs": ', '.join(map(str, student.get_lab_times())),
-                             "Lab Comments": student.get_lab_comments()})
+    unmtached_students_sheet = workbook["Unmatched Students"]
+    headers = ["Student Name", "Stage", "Transportation", "Transport Others",
+               "Transportation Comments", "Certifications", "Labs", "Lab Comments"]
+    unmtached_students_sheet.append(headers)
 
-    # shutil.move('unmatched_students.csv', os.path.expanduser('~')+'/Downloads/unmatched_students.csv')
+    for student in students:
+        for certification in student.get_certifications():
+            format_grades(certification.get_grades())
+        unmtached_students_sheet.append([student.get_name(),
+                                         'Stage 1 & 2' if isinstance(student, Stage1And2Student) else 'Stage 3',
+                                         'Yes' if student.get_transportation() else 'No',
+                                         'Yes' if student.get_transport_others() else 'No',
+                                         student.get_transportation_comments(),
+                                         ', '.join(map(str, student.get_certifications())),
+                                         ', '.join(map(str, student.get_lab_times())),
+                                         student.get_lab_comments()
+                                         ])
 
+
+def make_workbook():
+    workbook = Workbook()
+    schedule_sheet = workbook.active
+    unmatched_students_sheet = workbook.create_sheet()
+    schedule_sheet.title = "Schedule"
+    unmatched_students_sheet.title = "Unmatched Students"
+    
+    return workbook
 
 # def main():
 #     stage_1_and_2_students, stage_3_students = make_students("Testing_All_Student_Fields.csv")
@@ -489,8 +494,10 @@ def write_unmatched_students(students):
 #     stage_1_and_2_leftover, stage_1_and_2_need_ride = matchmaker(stage_1_and_2_students, teachers, alternate_time=True)
 
 #     assign_drivers(stage_3_need_ride + stage_1_and_2_need_ride, stage_1_and_2_students + stage_3_students)
-#     write_schedule(teachers)
-#     write_unmatched_students(stage_3_leftover + stage_1_and_2_leftover)
+#     workbook = make_workbook()
+#     write_schedule(teachers, workbook)
+#     write_unmatched_students(stage_3_leftover + stage_1_and_2_leftover, workbook)
+#     workbook.save(os.path.expanduser('~') + '/Downloads/Schedule.xlsx')
 
 
 # if __name__ == '__main__':

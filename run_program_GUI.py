@@ -3,9 +3,7 @@ import subprocess
 import tkinter as tk
 import tkinter.ttk as ttk
 from tkinter import filedialog
-from openpyxl import Workbook
-import csv
-from ed_code2 import make_students, make_teachers, matchmaker, write_schedule, write_unmatched_students, assign_drivers
+from ed_code2 import make_students, make_teachers, matchmaker, write_schedule, write_unmatched_students, assign_drivers, make_workbook
 
 class run_GUI:
     """
@@ -133,33 +131,11 @@ class run_GUI:
 
 
     def open_files(self, app):
-        workbook = Workbook()
-        schedule_file = 'sched.csv'
-        unmatched_file = 'unmatched_students.csv'
-        schedule_sheet = workbook.active
-        unmatched_students_sheet = workbook.create_sheet()
-
-        schedule_sheet.title = "Schedule"
-        unmatched_students_sheet.title = "Unmatched Students"
-
-        with open(schedule_file) as csv_file:
-            for row in csv.reader(csv_file):
-                schedule_sheet.append(row)
-
-        with open(unmatched_file) as csv_file:
-            for row in csv.reader(csv_file):
-                unmatched_students_sheet.append(row)
-
-        workbook.save(self.downloads_folder + '/Schedule.xlsx')
-
         try:
             # subprocess.run(['open', self.downloads_folder+'/unmatched_students.csv', self.downloads_folder+'/sched.csv', '-a', 'Microsoft Excel'], check=True)
             subprocess.run(['open', self.downloads_folder + '/Schedule.xlsx', '-a', app], check=True)
         except:
-            try:
-                subprocess.run(['open', self.downloads_folder + '/Schedule.xlsx'], check=True)
-            except:
-                subprocess.run(['open', self.downloads_folder+'/unmatched_students.csv', self.downloads_folder+'/sched.csv'], check=True)
+            subprocess.run(['open', self.downloads_folder + '/Schedule.xlsx'], check=True)
 
         self.window.destroy()
 
@@ -184,8 +160,10 @@ class run_GUI:
         stage_1_and_2_leftover, stage_1_and_2_need_ride = matchmaker(stage_1_and_2_students, teachers, alternate_time=True)
 
         assign_drivers(stage_3_need_ride + stage_1_and_2_need_ride, stage_1_and_2_students + stage_3_students)
-        write_schedule(teachers)
-        write_unmatched_students(stage_3_leftover + stage_1_and_2_leftover)
+        workbook = make_workbook()
+        write_schedule(teachers, workbook)
+        write_unmatched_students(stage_3_leftover + stage_1_and_2_leftover, workbook)
+        workbook.save(self.downloads_folder + '/Schedule.xlsx')
 
         if not self.open_file_label:
             self.display_open_message()
