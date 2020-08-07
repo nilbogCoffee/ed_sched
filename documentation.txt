@@ -1,0 +1,22 @@
+To packge the application, need to install py2app like:
+
+sudo python3 -m pip install -U py2app
+
+Then create setup.py file:
+
+py2applet --make-setup application.py
+
+Then modify APP variable in setup.py to be "application.py".
+And add the 'iconfile' key to the OPTIONS dict with the value of the .icns icon file.
+May need to add a 'packages' key to the OPTIONS dict as well with a list of packages that aren't part of the Python standard library
+
+Lastly, run:
+python3 setup.py py2app
+
+Now, the .app file will be "double-clickable" inside the dist folder.
+
+Next, we need to create .dmg file in order to distribute the app.
+Open diskutil and create image or use DMG Canvas app. Create the .dmg file and send it out.
+In order for others to open it however, they need to right click on it and hit open, otherwise they get warning.
+To get around warning, must sign the app with an apple developer ID certificate which can get online (only up to 5).
+May need to notarize app as well.

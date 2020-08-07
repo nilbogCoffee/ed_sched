@@ -94,7 +94,6 @@ def make_students(file_name):
     stage_3_students = []
     students = csv.DictReader(open(file_name, encoding='utf-8-sig'))   # Need encoding field to delete the Byte Order Mark (BOM)
     for student in students:
-        # Just need to check to make sure no whitespace fields maybe (var.isspace())
         email = student['Email Address'].strip()
         first_name = student['First Name'].strip()
         last_name = student['Last Name'].strip()
@@ -109,7 +108,7 @@ def make_students(file_name):
                         student['District Code 3'],
                         student['District Code 4']]
         certification = create_student_certifications(certification, other_certification)
-        # print(certification)
+
         if stage == 'Stage 1 & 2':
             preferred_time = student['Preferred Time']
             alternate_times = student['Alternate Time']
@@ -199,18 +198,7 @@ def check_certification(student, teacher):
     student_certifications = student.get_certifications()
     teacher_certification = teacher.get_certification()
     teacher_subject = teacher_certification.get_subject()
-    print('teacher subject:', teacher_subject)
     teacher_grade = teacher_certification.get_grades()
-    print('teacher grade:', teacher_grade)
-
-    # for cert in student_certifications:
-    #     print('student cert:', cert)
-    #     # print('cert subject:', cert.get_subject())
-    #     # print('cert grade:', cert.get_grades())
-    #     if cert.get_subject() == teacher_subject and all(grade in cert.get_grades() for grade in teacher_grade):
-    #         return True
-
-    # return False
 
     return any(cert.get_subject() == teacher_subject and 
                 all(grade in cert.get_grades() for grade in teacher_grade) 
@@ -225,8 +213,8 @@ def check_stage_1_and_2_preferred(student, teacher):
     :param teacher: The Teacher object
     :returns: A single element list of the student preferred time if that time is in teacher times, otherwise empty string
     """
-    # return student.get_preferred_lab_time() in teacher.get_stage2_times()
     return [student.get_preferred_lab_time()] if student.get_preferred_lab_time() in teacher.get_stage2_times() else ''
+
 
 def check_stage_1_and_2_alternate(student, teacher):
     """
@@ -243,7 +231,6 @@ def check_stage_1_and_2_alternate(student, teacher):
     #         return True
 
     # return False
-    # return any(time in teacher.get_stage2_times() for time in student.get_alt_lab_times())
     return list(filter(lambda ele: ele in teacher.get_stage2_times(), student.get_alt_lab_times()))
     
 
@@ -265,8 +252,6 @@ def check_stage_3_times(student, teacher):
     #         return True
 
     # return False
-    # return any(time in teacher.get_stage3_times() for time in student.get_lab_times())
-    # Use filter to return time if needed
     # Can also use list comp
     return list(filter(lambda time: time in teacher.get_stage3_times(), student.get_lab_times()))
 
@@ -322,22 +307,17 @@ def perform_checks(student, teacher, alternate_time):
     :returns: A four element tuple of all checks
     """
     certification = check_certification(student, teacher)
-    print(certification)
     school = check_school(student, teacher)
-    print(school)
     student_can_commute = check_transport(student, teacher)
-    print(student_can_commute)
 
     if isinstance(student, Stage3Student):
         lab_time = check_stage_3_times(student, teacher)
-        print(lab_time)
 
     elif isinstance(student, Stage1And2Student) and alternate_time:
         lab_time = check_stage_1_and_2_alternate(student, teacher)
-        print(lab_time)
+
     else:
         lab_time = check_stage_1_and_2_preferred(student, teacher)
-        print(lab_time)
     
     return certification, school, lab_time, student_can_commute
 
@@ -357,10 +337,15 @@ def match_found(student, teacher, lab_times):
         teacher.set_stage3_times(lab_times)
         teacher.set_stage2_times([])
     else:
+        if len(lab_times) == 1 and lab_times[0] == student.get_preferred_lab_time():
+            lab_times += check_stage_1_and_2_alternate(student, teacher)
+            if lab_times.count(lab_times[0]) > 1:
+                lab_times.reverse()
+                lab_times.remove(lab_times[0])
+                lab_times.reverse()
+            
         teacher.set_stage2_times(lab_times)
         teacher.set_stage3_times([])
-
-    student.set_lab_times(lab_times) # why
 
 
 def matchmaker(students, teachers, alternate_time=False):
@@ -378,8 +363,6 @@ def matchmaker(students, teachers, alternate_time=False):
     for student in students:
         for teacher in teachers:
             if not teacher.get_match_found() and not student.get_match_found():
-                print(student)
-                print(teacher)
                 certification, previous_school, lab_times, can_commute = perform_checks(student, teacher, alternate_time)
                 print(certification, previous_school, lab_times, can_commute)
                 if certification and lab_times and not previous_school:
@@ -391,7 +374,7 @@ def matchmaker(students, teachers, alternate_time=False):
     unmatched_students = [student for student in students if not student.get_match_found()]
 
     assign_drivers(students_need_ride, students)
-    print_sched(teacher for teacher in teachers if teacher.get_student())
+    print_sched(teacher for teacher in teachers if teacher.get_match_found())
 
     return unmatched_students
 
@@ -420,7 +403,7 @@ def format_grades(grades):
     if 0 in grades:
         grades[grades.index(0)] = 'K'
 
-    return grades # May not need to return 
+    return grades 
 
 
 def write_schedule(teachers):
@@ -429,7 +412,8 @@ def write_schedule(teachers):
     :param teachers: A list of Teacher objects
     """
     with open("sched.csv", "w") as schedule:
-        writer = csv.DictWriter(schedule, fieldnames=["Student Name", "Teacher Name", "District", "Subject", "Lab(s)", 
+        writer = csv.DictWriter(schedule, fieldnames=["Student Name", "Teacher Name", "Stage", "District", "Subject", 
+                                                      "Optimal Lab Time", "All Possible Lab Times", 
                                                       "Grade", "Transportation", "Transport Others", "Potential Drivers",
                                                       "Transportation Comments", "Lab Comments"])
         writer.writeheader()
@@ -437,11 +421,15 @@ def write_schedule(teachers):
         for teacher in teachers:
             if teacher.get_match_found():                
                 student = teacher.get_student()
+                lab_times = teacher.get_all_lab_times()
+                optimal = str(lab_times[0]) if isinstance(student, Stage1And2Student) and student.get_preferred_lab_time() == lab_times[0] else ''
                 writer.writerow({"Student Name": student.get_name(), 
-                                 "Teacher Name": teacher.get_name(), 
+                                 "Teacher Name": teacher.get_name(),
+                                 "Stage": 'Stage 1 & 2' if isinstance(student, Stage1And2Student) else 'Stage 3',
                                  "District": teacher.get_school(),
                                  "Subject": teacher.get_certification().get_subject(),
-                                 "Lab(s)": ', '.join(map(str, teacher.get_all_lab_times())),
+                                 "Optimal Lab Time": optimal,
+                                 "All Possible Lab Times": ', '.join(map(str, lab_times)),
                                  "Grade": ', '.join(map(str, format_grades(teacher.get_certification().get_grades()))),
                                  "Transportation": 'Yes' if student.get_transportation() else 'No',
                                  "Transport Others": 'Yes' if student.get_transport_others() else 'No',
@@ -449,7 +437,7 @@ def write_schedule(teachers):
                                  "Transportation Comments": student.get_transportation_comments(),
                                  "Lab Comments": student.get_lab_comments()})
 
-    shutil.move('sched.csv', os.path.expanduser('~')+'/Downloads/sched.csv')
+    # shutil.move('sched.csv', os.path.expanduser('~')+'/Downloads/sched.csv')
 
 
 def write_unmatched_students(students):
@@ -474,32 +462,35 @@ def write_unmatched_students(students):
                              "Labs": ', '.join(map(str, student.get_lab_times())),
                              "Lab Comments": student.get_lab_comments()})
 
-    shutil.move('unmatched_students.csv', os.path.expanduser('~')+'/Downloads/unmatched_students.csv')
-
-# def main():
-#     stage_1_and_2_students, stage_3_students = make_students("All Student Field Experiences.csv")
-#     teachers = make_teachers("Teacher Field Experiences Stage 1 and 2.csv")
-#     for student in stage_1_and_2_students:
-#         print()
-#         # print(student)
-#     for student in stage_3_students:
-#         print()
-#         # print(student)
-
-#     # print()
-#     for teacher in teachers:
-#         # print(teacher)
-#         print()
-
-#     # print()
-#     stage_3_leftover = matchmaker(stage_3_students, teachers) # all done for stage 3 students. Not tested well enough yet though
-#     matchmaker(stage_1_and_2_students, teachers) # all done for preferred time stage 1 and 2 students
-#     stage_1_and_2_leftover = matchmaker(stage_1_and_2_students, teachers, alternate_time=True) # all done
-
-#     write_schedule(teachers)
-#     write_unmatched_students(stage_3_leftover + stage_1_and_2_leftover)
+    # shutil.move('unmatched_students.csv', os.path.expanduser('~')+'/Downloads/unmatched_students.csv')
 
 
-# if __name__ == '__main__':
-#     main()
+def main():
+    stage_1_and_2_students, stage_3_students = make_students("Testing_All_Student_Fields.csv")
+    teachers = make_teachers("Testing_All_Teacher_Fields.csv")
+    for student in stage_1_and_2_students:
+        print(student)
+        print()
+    for student in stage_3_students:
+        print(student)
+        print()
 
+    # # print()
+    for teacher in teachers:
+        print(teacher)
+        print()
+
+    stage_3_leftover = matchmaker(stage_3_students, teachers)
+    matchmaker(stage_1_and_2_students, teachers)
+    stage_1_and_2_leftover = matchmaker(stage_1_and_2_students, teachers, alternate_time=True)
+
+    write_schedule(teachers)
+    write_unmatched_students(stage_3_leftover + stage_1_and_2_leftover)
+
+
+if __name__ == '__main__':
+    main()
+
+"""
+Need to test the assign drivers function and maybe more alternate/optimal times
+"""
