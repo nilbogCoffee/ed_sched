@@ -61,13 +61,12 @@ def create_time(time, other):
 
 
 def convert_grade(grade):
-    # grade.isspace() returns if grade is all whitespaces
     """
     Converts the teacher's grade
     :param grade: A string of the grade the teacher teaches
     :returns: A list of the new grades
     """
-    if grade[:2] == 'PK':
+    if grade.startswith('PK'):
         grade = [-1]
     elif grade == 'Kindergarten':
         grade = [0]
@@ -201,7 +200,7 @@ def check_certification(student, teacher):
 
     return any(cert.get_subject() == teacher_subject and 
                 all(grade in cert.get_grades() for grade in teacher_grade) 
-                for cert in student.get_certifications())
+                for cert in student_certifications)
 
 
 def check_stage_1_and_2_preferred(student, teacher):
@@ -223,15 +222,8 @@ def check_stage_1_and_2_alternate(student, teacher):
     :param teacher: The Teacher object
     :eturns: A list of all student alternate times that are in the teacher times
     """
-    # student_times = student.get_alternate_times()
-    # teacher_times = teacher.get_stage2_times()
-    # for time in student_times:
-    #     if time in teacher_times:
-    #         return True
+    return [time for time in student.get_alt_lab_times() if time in teacher.get_stage2_times()]
 
-    # return False
-    return list(filter(lambda ele: ele in teacher.get_stage2_times(), student.get_alt_lab_times()))
-    
 
 def check_stage_3_times(student, teacher):
     """
@@ -241,18 +233,7 @@ def check_stage_3_times(student, teacher):
     :param teacher: The Teacher object
     :returns: A list of all student times that are in the teacher times
     """
-    # student_times = student.get_lab_times()
-    # teacher_times = teacher.get_stage3_times()
-    # print(student_times)
-    # print(teacher_times[1])
-    # for time in student_times:
-    #     print(time)
-    #     if time in teacher_times:
-    #         return True
-
-    # return False
-    # Can also use list comp
-    return list(filter(lambda time: time in teacher.get_stage3_times(), student.get_lab_times()))
+    return [time for time in student.get_lab_times() if time in teacher.get_stage3_times()]
 
 
 def check_school(student, teacher):
@@ -374,8 +355,6 @@ def matchmaker(students, teachers, alternate_time=False):
 
     unmatched_students = [student for student in students if not student.get_match_found()]
 
-    # print_sched(teacher for teacher in teachers if teacher.get_match_found())
-
     return unmatched_students, students_need_ride
 
 
@@ -390,7 +369,6 @@ def assign_drivers(students_need_ride, all_students):
     for student in students_need_ride:
        for driver in all_students:
            if any(time in driver.get_lab_times() for time in student.get_lab_times()) and driver.get_transport_others() and driver.get_match_found():
-               print('one found')
                student.add_driver(driver)
 
 
@@ -410,7 +388,7 @@ def format_grades(grades):
 
 def write_schedule(teachers, workbook):
     """
-    Write results to csv file
+    Write results to a the schedule sheet in the workbook for the .xlsx file
     :param teachers: A list of Teacher objects
     """
     schedule_sheet = workbook["Schedule"]
@@ -444,6 +422,7 @@ def write_schedule(teachers, workbook):
 def write_unmatched_students(students, workbook):
     """
     Write the students that have no assigned field experience to a csv file
+    Write students that have no assigned field experience to the unmatched students sheet in the workbook for the .xlsx file
     :param students: A list of Student objects
     """
     unmtached_students_sheet = workbook["Unmatched Students"]
@@ -466,6 +445,10 @@ def write_unmatched_students(students, workbook):
 
 
 def make_workbook():
+    """
+    Create the .xlsx file workbook with two sheets for the final schedule and unmatched students
+    :returns: The new workbook object
+    """
     workbook = Workbook()
     schedule_sheet = workbook.active
     unmatched_students_sheet = workbook.create_sheet()

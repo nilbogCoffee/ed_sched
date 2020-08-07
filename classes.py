@@ -27,12 +27,6 @@ class Student:
     def set_certifications(self, certifications):
         self.certifications = certifications
 
-    # def get_certification_comments(self):
-        # return self.certification_comments
-
-    # def set_certification_comments(self, comment):
-    #     self.certification_comments = comment
-
     def get_transportation(self):
         return self.transportation
 
@@ -198,7 +192,7 @@ class LabTime:
 
 class Teacher:
     """
-    Teacher parent class
+    Teacher class
     """
 
     def __init__(self, email: str, name: str, school: str, certification: str, stage2_times: list, stage3_times: list):

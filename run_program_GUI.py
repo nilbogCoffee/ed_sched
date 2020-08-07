@@ -10,7 +10,8 @@ class run_GUI:
     This class is used to run the GUI for this program.
     First, it asks for 2 files that the user can choose from their Finder Menu after hitting the Browse buttons
     Then, it lists the filenames without their full paths that the user has provided.
-    Lastly, it exposes the run button to run the scheduler
+    Next, it exposes the Create Schedule button to run the scheduler
+    Lastly, the user will be asked to open the file in excel or Numbers and then the window will be destroyed
     """
 
     def __init__(self):
@@ -26,6 +27,7 @@ class run_GUI:
 
 
     def check_run_button(self):
+        """Check if the error label already exists and make create the create schedule button if there are two filenames provided"""
         if self.error_label:
             self.error_label.destroy()
             self.error_label = None
@@ -46,6 +48,7 @@ class run_GUI:
 
     
     def display_teacher_file(self, filename):
+        """Add the file to the filenames dictionary and retrieve the file's name without the full path to display it"""
         self.add_file(filename, 'Teacher')
         filename = self.parse_filename(filename)
         if self.confirmation_teacher_label:
@@ -57,7 +60,7 @@ class run_GUI:
 
 
     def choose_student_file(self):
-        """Retrieve the full path for the student .csv file from the Finder Menu"""
+        """Retrieve the full path for the student .csv file from the Finder Menu. Only allow .csv files to be selected"""
         filename = filedialog.askopenfilename(initialdir=os.getenv('HOME', '/'), 
                                               title="Select A Student .csv File", 
                                               filetypes=(("csv files","*.csv"),))
@@ -67,7 +70,7 @@ class run_GUI:
 
 
     def choose_teacher_file(self):
-        """Retrieve the full path for the teacher .csv file from the Finder Menu"""
+        """Retrieve the full path for the teacher .csv file from the Finder Menu. Only allow .csv files to be selected"""
         filename = filedialog.askopenfilename(initialdir=os.getenv('HOME', '/'), 
                                               title="Select A Teacher .csv File", 
                                               filetypes=(("csv files","*.csv"),))
@@ -82,12 +85,12 @@ class run_GUI:
 
 
     def add_file(self, filename, type_of_file):
-        """Adds a file to the list of files that are being used by the scheduler"""
+        """Adds a file to the filenames dictionary that is being used by the scheduler"""
         self.filenames[type_of_file] = filename
 
 
     def create_widgets(self):
-        """Creates the first screen with the heading and button and begins the event handler"""
+        """Creates the first window with the heading and button and begins the event handler"""
         small_label_font = ("calibri", 15, "underline")
         label = tk.Label(master=self.window, font=("calibri", "20", "bold"), text="Choose both the student and teacher .csv files you wish to use for scheduling:").pack()
 
@@ -113,7 +116,8 @@ class run_GUI:
 
 
     def display_open_message(self):
-        self.open_file_label = tk.Label(master=self.window, text="Open csv files?")
+        """Ask the user to open files in excel or Numbers. Then display three buttons inline"""
+        self.open_file_label = tk.Label(master=self.window, text="Schedule.xlsx file saved to Downloads folder. Open Schedule.xlsx?")
         self.open_file_label.pack()
 
         top = tk.Frame(self.window)
@@ -131,6 +135,7 @@ class run_GUI:
 
 
     def open_files(self, app):
+        """open the the new schedule file in excel or Numbers or whatever the default opener is"""
         try:
             # subprocess.run(['open', self.downloads_folder+'/unmatched_students.csv', self.downloads_folder+'/sched.csv', '-a', 'Microsoft Excel'], check=True)
             subprocess.run(['open', self.downloads_folder + '/Schedule.xlsx', '-a', app], check=True)
@@ -141,6 +146,7 @@ class run_GUI:
 
 
     def run(self):
+        """Run the whole program and save results in excel file"""
         try:
             stage_1_and_2_students, stage_3_students = make_students(self.get_filenames()['Student'])
             teachers = make_teachers(self.get_filenames()['Teacher'])
