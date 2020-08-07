@@ -3,7 +3,8 @@ import subprocess
 import tkinter as tk
 import tkinter.ttk as ttk
 from tkinter import filedialog
-from ed_code2 import make_students, make_teachers, matchmaker, write_schedule, write_unmatched_students
+# from classes import Student, Stage1And2Student, Stage3Student
+from ed_code2 import make_students, make_teachers, matchmaker, write_schedule, write_unmatched_students, assign_drivers
 
 class run_GUI:
     """
@@ -146,31 +147,21 @@ class run_GUI:
                 self.error_label.destroy()
         except:
             if not self.error_label:
-                self.error_label = tk.Label(master=self.window, font=("calibri", 25, "bold underline"), fg="red", text="Cannot read files! Make sure to download csv files directly from the generated Google Sheet.")
+                self.error_label = tk.Label(master=self.window,
+                                            font=("calibri", 25, "bold underline"),
+                                            fg="red",
+                                            text="Cannot read files! Make sure to download csv files directly from the generated Google Sheet.")
                 self.error_label.pack()
             return
 
-        for student in stage_1_and_2_students:
-            print()
-            # print(student)
-        for student in stage_3_students:
-            print()
-            # print(student)
+        stage_3_leftover, stage_3_need_ride = matchmaker(stage_3_students, teachers) 
+        matchmaker(stage_1_and_2_students, teachers)
+        stage_1_and_2_leftover, stage_1_and_2_need_ride = matchmaker(stage_1_and_2_students, teachers, alternate_time=True)
 
-        # print()
-        for teacher in teachers:
-            # print(teacher)
-            print()
-
-        stage_3_leftover = matchmaker(stage_3_students, teachers) # all done for stage 3 students. Not tested well enough yet though
-        matchmaker(stage_1_and_2_students, teachers) # all done for preferred time stage 1 and 2 students
-        stage_1_and_2_leftover = matchmaker(stage_1_and_2_students, teachers, alternate_time=True) # all done
-
+        assign_drivers(stage_3_need_ride + stage_1_and_2_need_ride, stage_1_and_2_students + stage_3_students)
         write_schedule(teachers)
         write_unmatched_students(stage_3_leftover + stage_1_and_2_leftover)
 
         if not self.open_file_label:
             self.display_open_message()
 
-# if __name__ == '__main__':
-#     run('')

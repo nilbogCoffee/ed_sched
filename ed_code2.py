@@ -1,7 +1,7 @@
 import csv
 import shutil
 import os
-from classes import Teacher, Certification, LabTime, Stage1And2Student, Stage3Student
+from classes import Teacher, Certification, LabTime, Stage1And2Student, Stage3Student, Student
 
 def create_student_certifications(certification, other): #There are semi-colons in the csv file downloaded from Google forms
     """
@@ -347,6 +347,8 @@ def match_found(student, teacher, lab_times):
         teacher.set_stage2_times(lab_times)
         teacher.set_stage3_times([])
 
+    student.set_lab_times(lab_times)
+
 
 def matchmaker(students, teachers, alternate_time=False):
     """
@@ -373,10 +375,9 @@ def matchmaker(students, teachers, alternate_time=False):
 
     unmatched_students = [student for student in students if not student.get_match_found()]
 
-    assign_drivers(students_need_ride, students)
-    print_sched(teacher for teacher in teachers if teacher.get_match_found())
+    # print_sched(teacher for teacher in teachers if teacher.get_match_found())
 
-    return unmatched_students
+    return unmatched_students, students_need_ride
 
 
 def assign_drivers(students_need_ride, all_students):
@@ -385,9 +386,11 @@ def assign_drivers(students_need_ride, all_students):
     :param students_need_ride: A list of students that cannot commute
     :param all_students: A list of all students
     """
+    print(students_need_ride)
+    print(all_students)
     for student in students_need_ride:
        for driver in all_students:
-           if any(time in driver.get_lab_times() for time in student.get_lab_times()) and driver.get_transport_others():
+           if any(time in driver.get_lab_times() for time in student.get_lab_times()) and driver.get_transport_others() and driver.get_match_found():
                print('one found')
                student.add_driver(driver)
 
@@ -433,11 +436,12 @@ def write_schedule(teachers):
                                  "Grade": ', '.join(map(str, format_grades(teacher.get_certification().get_grades()))),
                                  "Transportation": 'Yes' if student.get_transportation() else 'No',
                                  "Transport Others": 'Yes' if student.get_transport_others() else 'No',
-                                 "Potential Drivers": student.get_other_drivers() if student.get_other_drivers() else '',
+                                 "Potential Drivers": ', '.join(map(Student.get_name, student.get_other_drivers())) if student.get_other_drivers() else '',
                                  "Transportation Comments": student.get_transportation_comments(),
-                                 "Lab Comments": student.get_lab_comments()})
+                                 "Lab Comments": student.get_lab_comments()
+                                 })
 
-    # shutil.move('sched.csv', os.path.expanduser('~')+'/Downloads/sched.csv')
+    shutil.move('sched.csv', os.path.expanduser('~')+'/Downloads/sched.csv')
 
 
 def write_unmatched_students(students):
@@ -449,7 +453,7 @@ def write_unmatched_students(students):
         writer = csv.DictWriter(schedule, fieldnames=["Student Name", "Stage", "Transportation", "Transport Others",
                                                       "Transportation Comments", "Certifications", "Labs", "Lab Comments"])
         writer.writeheader()
-
+        print(students)
         for student in students:
             for certification in student.get_certifications():
                 format_grades(certification.get_grades())
@@ -462,35 +466,32 @@ def write_unmatched_students(students):
                              "Labs": ', '.join(map(str, student.get_lab_times())),
                              "Lab Comments": student.get_lab_comments()})
 
-    # shutil.move('unmatched_students.csv', os.path.expanduser('~')+'/Downloads/unmatched_students.csv')
+    shutil.move('unmatched_students.csv', os.path.expanduser('~')+'/Downloads/unmatched_students.csv')
 
 
-def main():
-    stage_1_and_2_students, stage_3_students = make_students("Testing_All_Student_Fields.csv")
-    teachers = make_teachers("Testing_All_Teacher_Fields.csv")
-    for student in stage_1_and_2_students:
-        print(student)
-        print()
-    for student in stage_3_students:
-        print(student)
-        print()
+# def main():
+#     stage_1_and_2_students, stage_3_students = make_students("Testing_All_Student_Fields.csv")
+#     teachers = make_teachers("Testing_All_Teacher_Fields.csv")
+#     for student in stage_1_and_2_students:
+#         print(student)
+#         print()
+#     for student in stage_3_students:
+#         print(student)
+#         print()
 
-    # # print()
-    for teacher in teachers:
-        print(teacher)
-        print()
+#     # # print()
+#     for teacher in teachers:
+#         print(teacher)
+#         print()
 
-    stage_3_leftover = matchmaker(stage_3_students, teachers)
-    matchmaker(stage_1_and_2_students, teachers)
-    stage_1_and_2_leftover = matchmaker(stage_1_and_2_students, teachers, alternate_time=True)
+#     stage_3_leftover, stage_3_need_ride = matchmaker(stage_3_students, teachers)
+#     matchmaker(stage_1_and_2_students, teachers)
+#     stage_1_and_2_leftover, stage_1_and_2_need_ride = matchmaker(stage_1_and_2_students, teachers, alternate_time=True)
 
-    write_schedule(teachers)
-    write_unmatched_students(stage_3_leftover + stage_1_and_2_leftover)
+#     assign_drivers(stage_3_need_ride + stage_1_and_2_need_ride, stage_1_and_2_students + stage_3_students)
+#     write_schedule(teachers)
+#     write_unmatched_students(stage_3_leftover + stage_1_and_2_leftover)
 
 
-if __name__ == '__main__':
-    main()
-
-"""
-Need to test the assign drivers function and maybe more alternate/optimal times
-"""
+# if __name__ == '__main__':
+#     main()
