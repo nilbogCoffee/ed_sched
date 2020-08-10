@@ -85,7 +85,7 @@ class Student:
         self.lab_comments = comment
 
     def __str__(self):
-        certifications = ', '.join(map(lambda cert: cert.__str__(), self.get_certifications()))
+        certifications = ', '.join(map(str, self.get_certifications()))
         return (f'Email: {self.get_email()}\n'
                 f'Name: {self.get_name()}\n'
                 f'Certification: {certifications}\n'

@@ -65,7 +65,7 @@ class run_GUI:
                                               title="Select A Student .csv File", 
                                               filetypes=(("csv files","*.csv"),))
         if not filename:
-            return # Error message
+            return
         self.display_student_file(filename)
 
 
@@ -75,7 +75,7 @@ class run_GUI:
                                               title="Select A Teacher .csv File", 
                                               filetypes=(("csv files","*.csv"),))
         if not filename:
-            return # Error message
+            return
         self.display_teacher_file(filename)
 
 
@@ -137,7 +137,6 @@ class run_GUI:
     def open_files(self, app):
         """open the the new schedule file in excel or Numbers or whatever the default opener is"""
         try:
-            # subprocess.run(['open', self.downloads_folder+'/unmatched_students.csv', self.downloads_folder+'/sched.csv', '-a', 'Microsoft Excel'], check=True)
             subprocess.run(['open', self.downloads_folder + '/Schedule.xlsx', '-a', app], check=True)
         except:
             subprocess.run(['open', self.downloads_folder + '/Schedule.xlsx'], check=True)

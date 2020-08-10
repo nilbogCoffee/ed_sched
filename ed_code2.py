@@ -256,28 +256,6 @@ def check_transport(student, teacher):
     return student.get_transportation()
 
 
-def print_sched(teachers):
-    """
-    Print the schedule results
-    Used for debugging
-    :param teachers: A list of Teacher objects 
-    """
-    for teacher in teachers:
-        student = teacher.get_student()
-        student_name = student.get_name()
-        teacher_name = teacher.get_name()
-        subject = teacher.get_certification().get_subject()
-        grades = ', '.join(map(str, teacher.get_certification().get_grades()))
-        lab_times = ', '.join(map(str, teacher.get_all_lab_times()))
-        if student.get_other_drivers():
-            print(f"{student_name} will join {teacher_name}, teaching {subject} to grade {grades} at any of these times: {lab_times}. Also, {student_name} should get a ride from one of the following:", 
-                   ', '.join(driver.get_name() for driver in student.get_other_drivers()))
-        elif not student.get_transportation() and not student.get_other_drivers():
-            print(f"{student_name} will join {teacher_name}, teaching {subject} to grade {grades} at any of these times: {lab_times}. Also, {student_name} will need a ride.")
-        else:
-            print(f"{student_name} will join {teacher_name}, teaching {subject} to grade {grades} at any of these times: {lab_times}")
-
-
 def perform_checks(student, teacher, alternate_time):
     """
     Perform all checks between student and teacher to see if they are compatible
@@ -346,7 +324,6 @@ def matchmaker(students, teachers, alternate_time=False):
         for teacher in teachers:
             if not teacher.get_match_found() and not student.get_match_found():
                 certification, previous_school, lab_times, can_commute = perform_checks(student, teacher, alternate_time)
-                print(certification, previous_school, lab_times, can_commute)
                 if certification and lab_times and not previous_school:
                     match_found(student, teacher, lab_times)
                     if not can_commute:
@@ -354,7 +331,6 @@ def matchmaker(students, teachers, alternate_time=False):
                     break
 
     unmatched_students = [student for student in students if not student.get_match_found()]
-
     return unmatched_students, students_need_ride
 
 
@@ -364,8 +340,6 @@ def assign_drivers(students_need_ride, all_students):
     :param students_need_ride: A list of students that cannot commute
     :param all_students: A list of all students
     """
-    print(students_need_ride)
-    print(all_students)
     for student in students_need_ride:
        for driver in all_students:
            if any(time in driver.get_lab_times() for time in student.get_lab_times()) and driver.get_transport_others() and driver.get_match_found():
@@ -457,31 +431,3 @@ def make_workbook():
     
     return workbook
 
-# def main():
-#     stage_1_and_2_students, stage_3_students = make_students("Testing_All_Student_Fields.csv")
-#     teachers = make_teachers("Testing_All_Teacher_Fields.csv")
-#     for student in stage_1_and_2_students:
-#         print(student)
-#         print()
-#     for student in stage_3_students:
-#         print(student)
-#         print()
-
-#     # # print()
-#     for teacher in teachers:
-#         print(teacher)
-#         print()
-
-#     stage_3_leftover, stage_3_need_ride = matchmaker(stage_3_students, teachers)
-#     matchmaker(stage_1_and_2_students, teachers)
-#     stage_1_and_2_leftover, stage_1_and_2_need_ride = matchmaker(stage_1_and_2_students, teachers, alternate_time=True)
-
-#     assign_drivers(stage_3_need_ride + stage_1_and_2_need_ride, stage_1_and_2_students + stage_3_students)
-#     workbook = make_workbook()
-#     write_schedule(teachers, workbook)
-#     write_unmatched_students(stage_3_leftover + stage_1_and_2_leftover, workbook)
-#     workbook.save(os.path.expanduser('~') + '/Downloads/Schedule.xlsx')
-
-
-# if __name__ == '__main__':
-#     main()
