@@ -195,11 +195,14 @@ class Teacher:
     Teacher class
     """
 
-    def __init__(self, email: str, name: str, school: str, certification: str, stage2_times: list, stage3_times: list):
+    def __init__(self, email: str, name: str, school: str, school_name: str, certification: str, principal_email: str, principal_name: str, stage2_times: list, stage3_times: list):
         self.email = email
         self.name = name
         self.certification = certification
         self.school = school
+        self.school_name = school_name
+        self.principal_email = principal_email
+        self.principal_name = principal_name
         self.stage2_times = stage2_times
         self.stage3_times = stage3_times
         self.match_found = False
@@ -216,6 +219,24 @@ class Teacher:
 
     def set_name(self, name):
         self.name = name
+
+    def get_school_name(self):
+        return self.school_name
+
+    def set_school_name(self, name):
+        self.school_name = name
+
+    def get_principal_email(self):
+        return self.principal_email
+
+    def set_principal_email(self, email):
+        self.principal_email = email
+
+    def get_principal_name(self):
+        return self.principal_name
+
+    def set_principal_name(self, name):
+        self.principal_name = name
 
     def get_certification(self):
         return self.certification

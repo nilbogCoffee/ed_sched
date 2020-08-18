@@ -169,6 +169,9 @@ def make_teachers(file_name):
         school = teacher['District/Entity']
         subject = teacher['Subject']
         grade = teacher['Grade']
+        principal_email = teacher['Principal\'s email'].strip()
+        principal_name = teacher['Principal\'s name'].strip()
+        school_name = teacher['School Name'].strip()
         stage_3_times = teacher['Stage 3 Lab']
         other_stage_3_times = teacher['If Other, indicate Stage 3 lab time'].strip()
         stage_1_and_2_times = teacher['Stage 1 & 2 Lab']
@@ -177,7 +180,10 @@ def make_teachers(file_name):
         new_teacher = Teacher(email=email,
                               name=name,
                               school=school,
+                              school_name=school_name,
                               certification=Certification(subject=subject, grades=convert_grade(grade)),
+                              principal_email=principal_email,
+                              principal_name=principal_name,
                               stage2_times=create_times(stage_1_and_2_times, other_stage_1_and_2_times),
                               stage3_times=create_times(stage_3_times, other_stage_3_times))
 
@@ -366,7 +372,7 @@ def write_schedule(teachers, workbook):
     :param teachers: A list of Teacher objects
     """
     schedule_sheet = workbook["Schedule"]
-    headers = ["Student Name", "Teacher Name", "Stage", "District", "Subject", 
+    headers = ["Student Name", "Teacher Name", "Stage", "District", "School Name", "Principal Name", "Principal Email", "Subject", 
                "Optimal Lab Time", "All Possible Lab Times", 
                "Grade", "Transportation", "Transport Others", "Potential Drivers",
                "Transportation Comments", "Lab Comments"]
@@ -381,6 +387,9 @@ def write_schedule(teachers, workbook):
                                    teacher.get_name(),
                                    'Stage 1 & 2' if isinstance(student, Stage1And2Student) else 'Stage 3',
                                    teacher.get_school(),
+                                   teacher.get_school_name(),
+                                   teacher.get_principal_name(),
+                                   teacher.get_principal_email(),
                                    teacher.get_certification().get_subject(),
                                    optimal,
                                    ', '.join(map(str, lab_times)),
