@@ -92,10 +92,12 @@ def make_students(file_name):
     stage_3_students = []
     students = csv.DictReader(open(file_name, encoding='utf-8-sig'))   # Need encoding field to delete the Byte Order Mark (BOM)
     for student in students:
+        virtual_or_both = student['While abiding by the Moravian Health Pledge and adhering to the CDC guidelines as defined in the online COVID training...  ']
         email = student['Email Address'].strip()
         first_name = student['First Name'].strip()
         last_name = student['Last Name'].strip()
         stage = student['Stage']
+        current_courses = student['Which courses are you registered for?']
         certification = student['Certification(s)']
         other_certification = student['If Other, indicate certification'].strip()
         transportation = student['Transportation']
@@ -106,15 +108,17 @@ def make_students(file_name):
                         student['District Code 3'],
                         student['District Code 4']]
         certification = create_student_certifications(certification, other_certification)
+        virtual_or_both = 'either' if virtual_or_both == 'I agree to complete my field experience hours in a virtual or in-person setting as assigned.' else 'online only'
 
         if stage == 'Stage 1 & 2':
             preferred_time = student['Preferred Time']
             alternate_times = student['Alternate Time']
             other_preferred_time = student['If Other, indicate preferred lab time'].strip()
             other_alternate_times = student['If Other, indicate alternate lab time'].strip()
-            lab_comments = student['Stage 1&2 Lab Comments'].strip()
+            lab_comments = student['Stage 1 & 2 Lab Comments'].strip()
 
-            new_student = Stage1And2Student(email=email,
+            new_student = Stage1And2Student(online_status=virtual_or_both,
+                                            email=email,
                                             name=first_name + ' ' + last_name,
                                             certifications=certification,
                                             transportation=transportation == 'Yes',
@@ -122,6 +126,7 @@ def make_students(file_name):
                                             preferred_lab_time=create_time(preferred_time, other_preferred_time),
                                             alt_lab_times=create_times(alternate_times, other_alternate_times),
                                             past_schools=past_schools,
+                                            current_courses=current_courses,
                                             transportation_comments=transportation_comments,
                                             lab_comments=lab_comments)
             stage_1_and_2_students.append(new_student)
@@ -136,17 +141,23 @@ def make_students(file_name):
             time_3582 = student['358.2 Time']
             other_time_3582 = student['If Other, indicate EDUC 358.2 lab time'].strip()
             lab_comments = student['Stage 3 Lab Comments'].strip()
+            time_4243 = student['424.3 Time']
+            other_time_4243 = student['If Other, indicate EDUC 424.3. lab time'].strip()
+
 
             lab_times = create_times(time_260, other_time_260) + create_times(time_360, other_time_360) + \
-                        create_times(time_368, other_time_368) + create_times(time_3582, other_time_3582)
+                        create_times(time_368, other_time_368) + create_times(time_3582, other_time_3582) + \
+                        create_times(time_4243, other_time_4243)
 
-            new_student = Stage3Student(email=email,
+            new_student = Stage3Student(online_status=virtual_or_both,
+                                        email=email,
                                         name=first_name + ' ' + last_name,
                                         certifications=certification,
                                         transportation=transportation == 'Yes',
                                         transport_others=transport_others == 'Yes',
                                         lab_times=lab_times,
                                         past_schools=past_schools,
+                                        current_courses=current_courses,
                                         transportation_comments=transportation_comments,
                                         lab_comments=lab_comments)
 
@@ -203,6 +214,9 @@ def check_certification(student, teacher):
     teacher_certification = teacher.get_certification()
     teacher_subject = teacher_certification.get_subject()
     teacher_grade = teacher_certification.get_grades()
+
+    if any(not isinstance(student_certification, Certification) for student_certification in student_certifications): 
+        return False
 
     return any(cert.get_subject() == teacher_subject and 
                 all(grade in cert.get_grades() for grade in teacher_grade) 
@@ -372,8 +386,8 @@ def write_schedule(teachers, workbook):
     :param teachers: A list of Teacher objects
     """
     schedule_sheet = workbook["Schedule"]
-    headers = ["Student Name", "Teacher Name", "Stage", "District", "School Name", "Principal Name", "Principal Email", "Subject", 
-               "Optimal Lab Time", "All Possible Lab Times", 
+    headers = ["Online or either", "Student Name", "Teacher Name", "Stage", "District", "School Name", "Principal Name", "Principal Email", "Subject", 
+               "Optimal Lab Time", "All Possible Lab Times", "Current Courses",
                "Grade", "Transportation", "Transport Others", "Potential Drivers",
                "Transportation Comments", "Lab Comments"]
     schedule_sheet.append(headers)
@@ -383,7 +397,8 @@ def write_schedule(teachers, workbook):
             student = teacher.get_student()
             lab_times = teacher.get_all_lab_times()
             optimal = str(lab_times[0]) if isinstance(student, Stage1And2Student) and student.get_preferred_lab_time() == lab_times[0] else ''
-            schedule_sheet.append([student.get_name(),
+            schedule_sheet.append([student.get_online_status(),
+                                   student.get_name(),
                                    teacher.get_name(),
                                    'Stage 1 & 2' if isinstance(student, Stage1And2Student) else 'Stage 3',
                                    teacher.get_school(),
@@ -393,6 +408,7 @@ def write_schedule(teachers, workbook):
                                    teacher.get_certification().get_subject(),
                                    optimal,
                                    ', '.join(map(str, lab_times)),
+                                   student.get_current_courses(),
                                    ', '.join(map(str, format_grades(teacher.get_certification().get_grades()))),
                                    'Yes' if student.get_transportation() else 'No',
                                    'Yes' if student.get_transport_others() else 'No',
@@ -409,18 +425,21 @@ def write_unmatched_students(students, workbook):
     :param students: A list of Student objects
     """
     unmtached_students_sheet = workbook["Unmatched Students"]
-    headers = ["Student Name", "Stage", "Transportation", "Transport Others",
-               "Transportation Comments", "Certifications", "Labs", "Lab Comments"]
+    headers = ["Online or either", "Student Name", "Stage", "Transportation", "Transport Others",
+               "Transportation Comments", "Current Courses", "Certifications", "Labs", "Lab Comments"]
     unmtached_students_sheet.append(headers)
 
     for student in students:
         for certification in student.get_certifications():
-            format_grades(certification.get_grades())
-        unmtached_students_sheet.append([student.get_name(),
+            if isinstance(certification, Certification):
+                format_grades(certification.get_grades())
+        unmtached_students_sheet.append([student.get_online_status(),
+                                         student.get_name(),
                                          'Stage 1 & 2' if isinstance(student, Stage1And2Student) else 'Stage 3',
                                          'Yes' if student.get_transportation() else 'No',
                                          'Yes' if student.get_transport_others() else 'No',
                                          student.get_transportation_comments(),
+                                         student.get_current_courses(),
                                          ', '.join(map(str, student.get_certifications())),
                                          ', '.join(map(str, student.get_lab_times())),
                                          student.get_lab_comments()
@@ -439,4 +458,21 @@ def make_workbook():
     unmatched_students_sheet.title = "Unmatched Students"
     
     return workbook
+
+
+# def main():
+
+#     stage1, stage3 = make_students('COVID FALL 2020 Copy of Field Experiences.csv')
+#     # teachers = make_teachers('Testing_All_Teacher_Fields - Form Responses 1.csv')
+
+#     # print(list(map(str, stage3)))
+
+#     # stage_3_leftover, stage_3_need_ride = matchmaker(stage3, teachers) 
+#     # matchmaker(stage1, teachers)
+#     # stage_1_and_2_leftover, stage_1_and_2_need_ride = matchmaker(stage1, teachers, alternate_time=True)
+
+
+# if __name__ == '__main__':
+#     main()
+
 

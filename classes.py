@@ -2,14 +2,16 @@ class Student:
     """
     Student parent class
     """
-    def __init__(self, email: str, name: str, certifications: list, transportation: bool, transport_others: bool, past_schools: list,
-                 transportation_comments: str, lab_comments: str):
+    def __init__(self, online_status: str, email: str, name: str, certifications: list, transportation: bool, transport_others: bool, past_schools: list,
+                 current_courses: str, transportation_comments: str, lab_comments: str):
+        self.online_status = online_status
         self.email = email
         self.name = name
         self.certifications = certifications
         self.transportation = transportation
         self.transport_others = transport_others
         self.past_schools = past_schools
+        self.current_courses = current_courses
         self.match_found = False
         self.other_drivers = []
         self.transportation_comments = transportation_comments
@@ -51,6 +53,12 @@ class Student:
     def set_past_schools(self, past_schools):
         self.past_schools = past_schools
 
+    def get_current_courses(self):
+        return self.current_courses
+
+    def set_current_courses(self, courses):
+        self.current_courses = courses
+
     def get_match_found(self):
         return self.match_found
     
@@ -71,6 +79,12 @@ class Student:
     
     def set_email(self, email):
         self.email = email
+
+    def get_online_status(self):
+        return self.online_status
+
+    def set_online_status(self, status):
+        self.online_status = status
 
     def get_lab_times(self):
         return self.lab_times
@@ -98,9 +112,9 @@ class Stage1And2Student(Student):
     """
     Subclass of Student class. Only difference is preferred lab time and alternate lab times
     """
-    def __init__(self, email: str, name: str, certifications: list, transportation: bool, transport_others: bool, 
+    def __init__(self, online_status: str, email: str, name: str, certifications: list, transportation: bool, transport_others: bool, current_courses: list,
                  preferred_lab_time: str, alt_lab_times: list, past_schools: list, transportation_comments: str, lab_comments: str):
-        super().__init__(email, name, certifications, transportation, transport_others, past_schools, transportation_comments, lab_comments)
+        super().__init__(online_status, email, name, certifications, transportation, transport_others, past_schools, current_courses, transportation_comments, lab_comments)
         self.preferred_lab_time = preferred_lab_time
         self.alt_lab_times = alt_lab_times
         self.lab_times = [self.preferred_lab_time] + self.alt_lab_times
@@ -127,9 +141,9 @@ class Stage3Student(Student):
     """
     Subclass of Student class for Stage 3 students. Only difference is lab times
     """
-    def __init__(self, email: str, name: str, certifications: list, transportation: bool, transport_others: bool, 
+    def __init__(self, online_status: str, email: str, name: str, certifications: list, transportation: bool, transport_others: bool, current_courses: str,
                  past_schools: list, lab_times: list, transportation_comments: str, lab_comments: str):
-        super().__init__(email, name, certifications, transportation, transport_others, past_schools, transportation_comments, lab_comments)
+        super().__init__(online_status, email, name, certifications, transportation, transport_others, past_schools, current_courses, transportation_comments, lab_comments)
         self.lab_times = lab_times
 
     def __str__(self):
